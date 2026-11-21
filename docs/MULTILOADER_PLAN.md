@@ -1,7 +1,10 @@
 # Tides of War — multi-loader / multi-version plan
 
-Goal: one codebase (this repo, `comfortforged/pirate-ships`) that builds **12 jars**:
-Fabric, NeoForge and Forge for Minecraft **1.21.1, 26.1, 26.2 and 26.3**, using **Stonecutter**.
+Goal: one codebase (this repo, `comfortforged/pirate-ships`) that builds **9 jars**:
+Fabric, NeoForge and Forge for Minecraft **26.1, 26.2 and 26.3**, using **Stonecutter**.
+
+> **1.21.1 support is dropped for now** (user decision, 2026-11-21). Don't add 1.21.1 nodes. The 1.21.1
+> notes in §1/§6 are kept only for a possible later port.
 Gameplay must stay exactly as it is today (see README). Your own server keeps running Fabric 26.3.
 
 Status when this plan was written: Phase 1 works on Fabric 26.3 only (single-version Loom project,
@@ -18,7 +21,7 @@ package `io.github.comfortforged.pirateships`, CI self-test passing).
 | Java package | `io.github.comfortforged.tidesofwar` |
 | License | **All Rights Reserved** (replace the MIT LICENSE file; set `"license": "ARR"` / `license="All Rights Reserved"`) |
 | Author | comfortforged |
-| Targets | 1.21.1, 26.1, 26.2, 26.3 × fabric, neoforge, forge |
+| Targets | 26.1, 26.2, 26.3 × fabric, neoforge, forge (1.21.1 dropped for now) |
 | Tooling | Stonecutter 0.10 + loom-back-compat (Fabric), ModDevGradle (NeoForge), ForgeGradle 7 (Forge) |
 | Mod is server-side only | Players don't need it; it must still load harmlessly on clients |
 
@@ -56,7 +59,7 @@ Clone with: `git clone -q --depth 1 -b refs https://github.com/comfortforged/pir
 ## 3. Target layout
 
 ```
-settings.gradle.kts          # Stonecutter: match("1.21.1"|"26.1"|"26.2"|"26.3", "fabric","neoforge","forge")
+settings.gradle.kts          # Stonecutter: match("26.1"|"26.2"|"26.3", "fabric","neoforge","forge")
 stonecutter.gradle.kts       # constants fabric/neoforge/forge, replacements (ResourceLocation->Identifier etc.)
 stonecutter.properties.toml  # per-version/per-loader deps (table in §1)
 build.fabric.gradle.kts      # from sc-template
@@ -116,14 +119,13 @@ table is a guide, not gospel. Note: `EntityJoinLevelEvent` must not discard duri
    into core/platform. Port CI (see §7). Self-test PASS.
 2. **Fabric 26.1 + 26.2.** Add nodes. Fix API drift with `//? if >=26.x {` blocks or `replacements`.
 3. **NeoForge 26.1/26.2/26.3.** Add `build.neoforge.gradle.kts`, `neoforge.mods.toml`, platform class.
-4. **1.21.1 Fabric + NeoForge.** Biggest API gap — see §6.
-5. **Forge all four.** Write `build.forge.gradle.kts` from the Forge MDK (FG7, `minecraft.dependency(...)`,
-   `minecraft.mavenizer(it)`, `fg.forgeMaven`, `fg.minecraftLibsMaven`, 1.21.1 needs
-   `mappings channel: 'official'`). Add `constants { match(loader, "fabric","neoforge","forge") }`.
+4. ~~1.21.1 Fabric + NeoForge~~ — dropped for now.
+5. **Forge 26.1/26.2/26.3.** Write `build.forge.gradle.kts` from the Forge MDK (FG7, `minecraft.dependency(...)`,
+   `minecraft.mavenizer(it)`, `fg.forgeMaven`, `fg.minecraftLibsMaven`). Add `constants { match(loader, "fabric","neoforge","forge") }`.
    Forge + Stonecutter is the least-trodden path: if FG7 fights Stonecutter's task model, fall back to
    generating the Forge build per node but keep the shared source. Also wire `createMinecraftArtifacts`-style
    task ordering like the NeoForge script does (`dependsOn("stonecutterGenerate")`).
-6. **Package**: collect 12 jars; refresh `Pirate-Ships-Server-Mods.zip` → `TidesOfWar-Server-Fabric-26.3.zip`
+6. **Package**: collect 9 jars; refresh `Pirate-Ships-Server-Mods.zip` → `TidesOfWar-Server-Fabric-26.3.zip`
    (mod + Fabric API) and the CurseForge profile; update README + project doc; copy to the user's folder
    `C:\Users\oscar\OneDrive\Documents\Bound by Code\Comfort Forged\Minecraft Mods\Pirate Ships`
    (via device_commit_files, staging from /mnt/user-data/outputs).
@@ -160,14 +162,14 @@ logic itself has none.
 
 ## 7. CI
 
-- Matrix job over the 12 nodes: `./gradlew :<node>:build` then the server self-test for that node
+- Matrix job over the 9 nodes: `./gradlew :<node>:build` then the server self-test for that node
   (Fabric: `:<node>:runServer`; NeoForge: `:<node>:runServer`; Forge: `:<node>:runServer`), each with
   `-Dtidesofwar.selftest=true`, `eula=true`, flat world, `pause-when-empty-seconds=-1` (26.x only).
   Pass = log contains `TIDESOFWAR SELFTEST PASS`.
 - Keep the per-node API dump step (javap of classes in `.github/api-classes.txt`) — it's how you get real
   method names without decompiled sources. Add a `printClasspath` task to each build script.
 - Keep publishing outputs to the `ci-output` branch (artifact downloads are blocked from the workspace):
-  one folder per node with build.log, server.log, api.txt, jar. The final job collects all 12 jars.
+  one folder per node with build.log, server.log, api.txt, jar. The final job collects all 9 jars.
 - `/home/claude/tools/ci.sh` waits for the run on HEAD and clones `ci-output` to `/home/claude/ci`
   (recreate it if the workspace was reset; it's ~15 lines). Use `gh api` REST calls, not GraphQL.
 - Matrix jobs pushing to one branch will race: have each job push to `ci-output-<node>` and a final
@@ -175,7 +177,7 @@ logic itself has none.
 
 ## 8. Definition of done
 
-- 12 self-tests PASS in CI; all 12 jars on `ci-output`.
+- 9 self-tests PASS in CI; all 9 jars on `ci-output`.
 - Fabric 26.3 jar is drop-in for the user's server (old ships and items still work).
 - README/guide updated (name, loaders, versions, install per loader), project doc `pirate-ships-guide.md`
   updated, files copied to the user's OneDrive folder.
