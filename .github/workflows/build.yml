@@ -14,6 +14,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - node: 26.1-fabric
+            loader: fabric
+            mc: "26.1.2"
+            fapi: "0.155.3+26.1.2"
+          - node: 26.2-fabric
+            loader: fabric
+            mc: "26.2"
+            fapi: "0.161.0+26.2"
           - node: 26.3-fabric
             loader: fabric
             mc: "26.3"

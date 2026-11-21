@@ -22,6 +22,8 @@ stonecutter {
             for (loader in loaders) version("$project-$loader", version).buildscript("build.$loader.gradle.kts")
         }
 
+        match("26.1", "fabric", version = "26.1.2")
+        match("26.2", "fabric")
         match("26.3", "fabric")
         vcsVersion = "26.3-fabric"
     }
