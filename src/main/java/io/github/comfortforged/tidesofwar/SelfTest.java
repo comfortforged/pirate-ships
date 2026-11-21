@@ -178,7 +178,7 @@ final class SelfTest {
 	}
 
 	/** Checks that data from before the rename (pirateships) is still understood. */
-	private void checkLegacy(ServerLevel level, ShipManager m) {
+	private static void checkLegacy(ServerLevel level, ShipManager m) {
 		// Old item key
 		ItemStack old = new ItemStack(Items.DARK_OAK_BOAT);
 		net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
