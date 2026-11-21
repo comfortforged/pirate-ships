@@ -1,0 +1,19 @@
+{
+	"schemaVersion": 1,
+	"id": "pirateships",
+	"version": "${version}",
+	"name": "Pirate Ships",
+	"description": "Summon huge sailable pirate ships with giant sails from your inventory.",
+	"authors": ["comfortforged"],
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["io.github.comfortforged.pirateships.PirateShips"]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
