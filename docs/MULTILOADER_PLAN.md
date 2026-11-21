@@ -5,6 +5,11 @@ Fabric, NeoForge and Forge for Minecraft **26.1, 26.2 and 26.3**, using **Stonec
 
 > **1.21.1 support is dropped for now** (user decision, 2026-11-21). Don't add 1.21.1 nodes. The 1.21.1
 > notes in §1/§6 are kept only for a possible later port.
+>
+> **Repo rename:** the user is renaming the repo to `comfortforged/tides-of-war`. After that, attach it
+> under the new name (`add_repo`), set `git remote set-url origin https://github.com/comfortforged/tides-of-war`,
+> and use the new name in every `gh api` / clone command below (the old URL redirects for git, not reliably for the API).
+
 Gameplay must stay exactly as it is today (see README). Your own server keeps running Fabric 26.3.
 
 Status when this plan was written: Phase 1 works on Fabric 26.3 only (single-version Loom project,
