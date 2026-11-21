@@ -17,6 +17,12 @@ package `io.github.comfortforged.pirateships`, CI self-test passing).
 
 ---
 
+## Progress
+
+- [x] **§4 Rename + migration DONE** (commit `84eab0f`, CI self-test PASS incl. legacy checks). Package/mod id/command/recipes are `tidesofwar`; old items, `pirateships/ships.json`, `pirateships_part` tags and `/pirateships` still work. Jar: `tides-of-war-0.1.0+26.3.jar`.
+- [ ] §5.1 Stonecutter skeleton (Fabric 26.3) — next.
+- Repo is still `comfortforged/pirate-ships` on GitHub (rename pending; `add_repo` for `tides-of-war` returned not found).
+
 ## 0. Decisions already made (don't re-ask)
 
 | Item | Value |
