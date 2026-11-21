@@ -122,20 +122,20 @@ public class Ship {
 		ShipModel m = model();
 		for (ShipModel.Part p : m.parts) {
 			Display.BlockDisplay d = new Display.BlockDisplay(Compat.blockDisplay(), level);
-			d.setBlockState(p.block());
-			d.setTransformation(new Transformation(
+			Compat.setBlockState(d, p.block());
+			Compat.setTransformation(d, new Transformation(
 					new Vector3f(p.x(), p.y(), p.z()),
 					new Quaternionf(),
 					new Vector3f(p.sx(), p.sy(), p.sz()),
 					new Quaternionf()));
-			d.setPosRotInterpolationDuration(2);
-			d.setViewRange(3.0f);
+			Compat.setPosRotInterpolationDuration(d, 2);
+			Compat.setViewRange(d, 3.0f);
 			parts.add(d);
 			add(level, manager, d);
 		}
 		for (int i = 0; i < m.seats.size(); i++) {
 			Display.ItemDisplay seat = new Display.ItemDisplay(Compat.itemDisplay(), level);
-			seat.setPosRotInterpolationDuration(2);
+			Compat.setPosRotInterpolationDuration(seat, 2);
 			seats.add(seat);
 			add(level, manager, seat);
 			if (i > 0) {
@@ -153,9 +153,9 @@ public class Ship {
 
 	private static Interaction button(ServerLevel level, float w, float h) {
 		Interaction b = new Interaction(Compat.interaction(), level);
-		b.setWidth(w);
-		b.setHeight(h);
-		b.setResponse(true);
+		Compat.setWidth(b, w);
+		Compat.setHeight(b, h);
+		Compat.setResponse(b, true);
 		return b;
 	}
 

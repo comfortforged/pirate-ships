@@ -8,6 +8,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.Block;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
@@ -16,6 +19,55 @@ import java.util.stream.Stream;
  */
 final class Compat {
 	private Compat() {}
+
+	// Display and Interaction setters are private in vanilla. Fabric API widens them, NeoForge/Forge don't.
+	// Minecraft 26.x runs with official (Mojang) names on every loader, so plain reflection works everywhere.
+	private static final Map<String, Method> METHODS = new ConcurrentHashMap<>();
+
+	private static void invoke(Class<?> owner, Object target, String name, Class<?> type, Object arg) {
+		try {
+			Method m = METHODS.computeIfAbsent(owner.getName() + "#" + name, k -> {
+				try {
+					Method found = owner.getDeclaredMethod(name, type);
+					found.setAccessible(true);
+					return found;
+				} catch (ReflectiveOperationException e) {
+					throw new IllegalStateException("Missing method " + owner.getName() + "." + name, e);
+				}
+			});
+			m.invoke(target, arg);
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalStateException("Couldn't call " + owner.getName() + "." + name, e);
+		}
+	}
+
+	static void setBlockState(Display.BlockDisplay d, net.minecraft.world.level.block.state.BlockState state) {
+		invoke(Display.BlockDisplay.class, d, "setBlockState", net.minecraft.world.level.block.state.BlockState.class, state);
+	}
+
+	static void setTransformation(Display d, com.mojang.math.Transformation t) {
+		invoke(Display.class, d, "setTransformation", com.mojang.math.Transformation.class, t);
+	}
+
+	static void setPosRotInterpolationDuration(Display d, int ticks) {
+		invoke(Display.class, d, "setPosRotInterpolationDuration", int.class, ticks);
+	}
+
+	static void setViewRange(Display d, float range) {
+		invoke(Display.class, d, "setViewRange", float.class, range);
+	}
+
+	static void setWidth(Interaction i, float w) {
+		invoke(Interaction.class, i, "setWidth", float.class, w);
+	}
+
+	static void setHeight(Interaction i, float h) {
+		invoke(Interaction.class, i, "setHeight", float.class, h);
+	}
+
+	static void setResponse(Interaction i, boolean response) {
+		invoke(Interaction.class, i, "setResponse", boolean.class, response);
+	}
 
 	static EntityType<Display.BlockDisplay> blockDisplay() {
 		//? if >=26.2 {
