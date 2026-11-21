@@ -3,7 +3,7 @@ plugins {
 }
 
 base {
-	archivesName = "pirate-ships"
+	archivesName = "tides-of-war"
 }
 
 version = "${project.version}+26.3"
@@ -11,8 +11,8 @@ version = "${project.version}+26.3"
 loom {
 	runs {
 		server {
-			if (System.getenv("PIRATESHIPS_SELFTEST") != null) {
-				vmArg "-Dpirateships.selftest=true"
+			if (System.getenv("TIDESOFWAR_SELFTEST") != null) {
+				vmArg "-Dtidesofwar.selftest=true"
 			}
 		}
 	}
@@ -44,7 +44,7 @@ java {
 
 jar {
 	from("LICENSE") {
-		rename { "${it}_pirate-ships" }
+		rename { "${it}_tides-of-war" }
 	}
 }
 

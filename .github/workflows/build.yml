@@ -37,18 +37,18 @@ jobs:
         if: steps.build.outcome == 'success' && hashFiles('**/SelfTest.java') != ''
         continue-on-error: true
         env:
-          PIRATESHIPS_SELFTEST: "1"
+          TIDESOFWAR_SELFTEST: "1"
         run: |
           mkdir -p run && echo "eula=true" > run/eula.txt
           printf "online-mode=false\nlevel-type=minecraft\\:flat\nspawn-protection=0\npause-when-empty-seconds=-1\n" > run/server.properties
           timeout 600 ./gradlew runServer 2>&1 | tee server.log || true
-          grep -q "PIRATESHIPS SELFTEST PASS" server.log
+          grep -q "TIDESOFWAR SELFTEST PASS" server.log
       - name: package server files and CurseForge profile
         if: steps.build.outcome == 'success'
         run: |
           FAPI=$(find ~/.gradle/caches -name "fabric-api-${FAPI_VER}.jar" | head -1)
           [ -z "$FAPI" ] && curl -sfLo /tmp/fabric-api.jar "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/${FAPI_VER}/fabric-api-${FAPI_VER}.jar" && FAPI=/tmp/fabric-api.jar
-          MOD=$(ls build/libs/pirate-ships-*.jar | grep -v sources | head -1)
+          MOD=$(ls build/libs/tides-of-war-*.jar | grep -v sources | head -1)
           mkdir -p dist/server-mods dist/profile/overrides/mods
           cp "$MOD" dist/server-mods/ && cp "$FAPI" "dist/server-mods/fabric-api-${FAPI_VER}.jar"
           cp dist/server-mods/*.jar dist/profile/overrides/mods/
@@ -57,15 +57,15 @@ jobs:
             "minecraft": { "version": "26.3", "modLoaders": [ { "id": "fabric-${LOADER_VER}", "primary": true } ] },
             "manifestType": "minecraftModpack",
             "manifestVersion": 1,
-            "name": "Pirate Ships",
+            "name": "Tides of War",
             "version": "0.1.0",
             "author": "comfortforged",
             "files": [],
             "overrides": "overrides"
           }
           JSON
-          (cd dist/profile && zip -qr ../Pirate-Ships-CurseForge-Profile.zip .)
-          (cd dist/server-mods && zip -qr ../Pirate-Ships-Server-Mods.zip .)
+          (cd dist/profile && zip -qr ../TidesOfWar-CurseForge-Profile.zip .)
+          (cd dist/server-mods && zip -qr ../TidesOfWar-Server-Mods.zip .)
           ls -la dist
         env:
           FAPI_VER: "0.166.2+26.3"

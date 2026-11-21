@@ -1,4 +1,4 @@
-package io.github.comfortforged.pirateships;
+package io.github.comfortforged.tidesofwar;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -92,7 +92,7 @@ public final class ShipManager {
 
 	/** Called whenever an entity loads; old saved copies of ship parts get cleaned up. */
 	void onEntityLoad(Entity e) {
-		if (e.entityTags().contains(Ship.PART_TAG) && !partOwners.containsKey(e.getUUID())) {
+		if (Ship.isPart(e) && !partOwners.containsKey(e.getUUID())) {
 			staleParts.add(e);
 		}
 	}
@@ -219,7 +219,12 @@ public final class ShipManager {
 
 	// ------------------------------------------------------------------ saving
 
-	private Path file() {
+	Path file() {
+		return server.getWorldPath(LevelResource.ROOT).resolve("tidesofwar").resolve("ships.json");
+	}
+
+	/** Where ships were saved before the rename to Tides of War. */
+	Path legacyFile() {
 		return server.getWorldPath(LevelResource.ROOT).resolve("pirateships").resolve("ships.json");
 	}
 
@@ -251,7 +256,7 @@ public final class ShipManager {
 				if (st.isEmpty()) continue;
 				var res = ItemStack.CODEC.encodeStart(ops, st);
 				int slot = i;
-				res.resultOrPartial(err -> PirateShips.LOGGER.error("Couldn't save cargo item: {}", err)).ifPresent(json -> {
+				res.resultOrPartial(err -> TidesOfWar.LOGGER.error("Couldn't save cargo item: {}", err)).ifPresent(json -> {
 					JsonObject e = new JsonObject();
 					e.addProperty("slot", slot);
 					e.add("item", json);
@@ -270,14 +275,20 @@ public final class ShipManager {
 			Files.writeString(tmp, gson.toJson(root), StandardCharsets.UTF_8);
 			Files.move(tmp, f, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException e) {
-			PirateShips.LOGGER.error("Couldn't save pirate ships", e);
+			TidesOfWar.LOGGER.error("Couldn't save ships", e);
 		}
 	}
 
 	void load() {
 		ships.clear();
 		Path f = file();
-		if (!Files.exists(f)) return;
+		boolean migrated = false;
+		if (!Files.exists(f)) {
+			Path old = legacyFile();
+			if (!Files.exists(old)) return;
+			f = old;
+			migrated = true;
+		}
 		try {
 			JsonObject root = JsonParser.parseString(Files.readString(f, StandardCharsets.UTF_8)).getAsJsonObject();
 			DynamicOps<JsonElement> ops = ops();
@@ -295,7 +306,7 @@ public final class ShipManager {
 						JsonObject c = ce.getAsJsonObject();
 						int slot = c.get("slot").getAsInt();
 						ItemStack.CODEC.parse(ops, c.get("item"))
-								.resultOrPartial(err -> PirateShips.LOGGER.error("Couldn't load cargo item: {}", err))
+								.resultOrPartial(err -> TidesOfWar.LOGGER.error("Couldn't load cargo item: {}", err))
 								.ifPresent(st -> {
 									if (slot >= 0 && slot < s.cargo.getContainerSize()) s.cargo.setItem(slot, st);
 								});
@@ -303,9 +314,13 @@ public final class ShipManager {
 				}
 				ships.put(s.id, s);
 			}
-			PirateShips.LOGGER.info("Loaded {} pirate ship(s)", ships.size());
+			TidesOfWar.LOGGER.info("Loaded {} ship(s)", ships.size());
+			if (migrated) {
+				save();
+				TidesOfWar.LOGGER.info("Migrated ships from {} to {}", f, file());
+			}
 		} catch (Exception e) {
-			PirateShips.LOGGER.error("Couldn't load pirate ships from " + f, e);
+			TidesOfWar.LOGGER.error("Couldn't load ships from " + f, e);
 		}
 	}
 }

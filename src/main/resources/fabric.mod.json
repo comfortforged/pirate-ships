@@ -1,14 +1,14 @@
 {
 	"schemaVersion": 1,
-	"id": "pirateships",
+	"id": "tidesofwar",
 	"version": "${version}",
-	"name": "Pirate Ships",
-	"description": "Summon huge sailable pirate ships with giant sails from your inventory.",
+	"name": "Tides of War",
+	"description": "Command the seas: summon huge sailable pirate ships with giant sails from your inventory.",
 	"authors": ["comfortforged"],
-	"license": "MIT",
+	"license": "All Rights Reserved",
 	"environment": "*",
 	"entrypoints": {
-		"main": ["io.github.comfortforged.pirateships.PirateShips"]
+		"main": ["io.github.comfortforged.tidesofwar.TidesOfWar"]
 	},
 	"depends": {
 		"fabricloader": ">=0.19.5",

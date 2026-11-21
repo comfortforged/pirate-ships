@@ -1,4 +1,4 @@
-package io.github.comfortforged.pirateships;
+package io.github.comfortforged.tidesofwar;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -15,7 +15,9 @@ import java.util.List;
 
 /** The ship item: a vanilla dark oak boat tagged with which ship it summons. */
 public final class ShipItems {
-	public static final String TYPE_KEY = "pirateships_type";
+	public static final String TYPE_KEY = "tidesofwar_type";
+	/** Item data key used before the rename; ship items from older versions still work. */
+	public static final String LEGACY_TYPE_KEY = "pirateships_type";
 
 	private ShipItems() {}
 
@@ -40,7 +42,9 @@ public final class ShipItems {
 		if (stack.isEmpty()) return null;
 		CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
 		if (data == null) return null;
-		String id = data.copyTag().getStringOr(TYPE_KEY, "");
+		CompoundTag tag = data.copyTag();
+		String id = tag.getStringOr(TYPE_KEY, "");
+		if (id.isEmpty()) id = tag.getStringOr(LEGACY_TYPE_KEY, "");
 		return id.isEmpty() ? null : ShipType.byId(id);
 	}
 

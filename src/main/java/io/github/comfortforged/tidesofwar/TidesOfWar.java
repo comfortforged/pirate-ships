@@ -1,6 +1,7 @@
-package io.github.comfortforged.pirateships;
+package io.github.comfortforged.tidesofwar;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -30,8 +31,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class PirateShips implements ModInitializer {
-	public static final String MOD_ID = "pirateships";
+public class TidesOfWar implements ModInitializer {
+	public static final String MOD_ID = "tidesofwar";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
@@ -52,7 +53,7 @@ public class PirateShips implements ModInitializer {
 			ShipManager m = ShipManager.get();
 			if (m != null) {
 				m.onEntityLoad(entity);
-			} else if (entity.entityTags().contains(Ship.PART_TAG)) {
+			} else if (Ship.isPart(entity)) {
 				// Leftovers loading before the manager starts are never live parts.
 				entity.discard();
 			}
@@ -61,7 +62,7 @@ public class PirateShips implements ModInitializer {
 		// Get players off ship seats before they log out, so the seat isn't saved with them.
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ServerPlayer p = handler.player;
-			if (p != null && p.getVehicle() != null && p.getVehicle().entityTags().contains(Ship.PART_TAG)) {
+			if (p != null && p.getVehicle() != null && Ship.isPart(p.getVehicle())) {
 				p.stopRiding();
 			}
 		});
@@ -95,11 +96,11 @@ public class PirateShips implements ModInitializer {
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, ctx, selection) -> registerCommands(dispatcher));
 
-		if (Boolean.getBoolean("pirateships.selftest")) {
+		if (Boolean.getBoolean("tidesofwar.selftest")) {
 			SelfTest.install();
 		}
 
-		LOGGER.info("Pirate Ships ready: {} ship types", ShipType.values().length);
+		LOGGER.info("Tides of War ready: {} ship types", ShipType.values().length);
 	}
 
 	private static void handleShipClick(ShipManager m, Ship ship, ServerPlayer player, Entity clicked) {
@@ -152,7 +153,7 @@ public class PirateShips implements ModInitializer {
 
 	private static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
 		String[] typeIds = Arrays.stream(ShipType.values()).map(ShipType::id).toArray(String[]::new);
-		dispatcher.register(Commands.literal("pirateships")
+		LiteralCommandNode<CommandSourceStack> root = dispatcher.register(Commands.literal("tidesofwar")
 				.then(Commands.literal("give")
 						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 						.then(Commands.argument("targets", EntityArgument.players())
@@ -207,5 +208,7 @@ public class PirateShips implements ModInitializer {
 							c.getSource().sendSuccess(() -> Component.literal("Your " + name + " has been returned to you, cargo and all."), false);
 							return 1;
 						})));
+		// Old name still works.
+		dispatcher.register(Commands.literal("pirateships").redirect(root));
 	}
 }

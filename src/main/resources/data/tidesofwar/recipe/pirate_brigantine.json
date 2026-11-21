@@ -2,13 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    " W ",
+    "WIW",
     "WWW",
-    "PBP"
+    "LBL"
   ],
   "key": {
     "W": "#minecraft:wool",
-    "P": "#minecraft:planks",
+    "I": "minecraft:iron_ingot",
+    "L": "#minecraft:logs",
     "B": "#minecraft:boats"
   },
   "result": {
@@ -16,10 +17,10 @@
     "count": 1,
     "components": {
       "minecraft:custom_data": {
-        "pirateships_type": "sloop"
+        "tidesofwar_type": "brigantine"
       },
       "minecraft:item_name": {
-        "text": "Pirate Sloop",
+        "text": "Pirate Brigantine",
         "color": "gold"
       },
       "minecraft:enchantment_glint_override": true,
@@ -31,7 +32,7 @@
           "italic": false
         },
         {
-          "text": "27 cargo slots, 3 passenger seats",
+          "text": "27 cargo slots, 5 passenger seats",
           "color": "dark_gray",
           "italic": false
         }

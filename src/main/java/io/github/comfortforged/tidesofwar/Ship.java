@@ -1,4 +1,4 @@
-package io.github.comfortforged.pirateships;
+package io.github.comfortforged.tidesofwar;
 
 import com.mojang.math.Transformation;
 import net.minecraft.ChatFormatting;
@@ -27,7 +27,14 @@ import java.util.UUID;
  * while players are nearby it shows itself using display entities that follow it every tick.
  */
 public class Ship {
-	public static final String PART_TAG = "pirateships_part";
+	public static final String PART_TAG = "tidesofwar_part";
+	/** Entity tag used before the Tides of War rename; such entities are leftovers and get cleaned up. */
+	public static final String LEGACY_PART_TAG = "pirateships_part";
+
+	public static boolean isPart(Entity e) {
+		var tags = e.entityTags();
+		return tags.contains(PART_TAG) || tags.contains(LEGACY_PART_TAG);
+	}
 	/** How far below the top of the water block the ship's waterline sits. */
 	public static final double DRAFT = 0.45;
 

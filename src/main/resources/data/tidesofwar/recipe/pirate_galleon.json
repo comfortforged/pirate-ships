@@ -2,13 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
+    "WDW",
     "WIW",
-    "WWW",
     "LBL"
   ],
   "key": {
     "W": "#minecraft:wool",
-    "I": "minecraft:iron_ingot",
+    "D": "minecraft:diamond",
+    "I": "minecraft:iron_block",
     "L": "#minecraft:logs",
     "B": "#minecraft:boats"
   },
@@ -17,10 +18,10 @@
     "count": 1,
     "components": {
       "minecraft:custom_data": {
-        "pirateships_type": "brigantine"
+        "tidesofwar_type": "galleon"
       },
       "minecraft:item_name": {
-        "text": "Pirate Brigantine",
+        "text": "Pirate Galleon",
         "color": "gold"
       },
       "minecraft:enchantment_glint_override": true,
@@ -32,7 +33,7 @@
           "italic": false
         },
         {
-          "text": "27 cargo slots, 5 passenger seats",
+          "text": "54 cargo slots, 7 passenger seats",
           "color": "dark_gray",
           "italic": false
         }

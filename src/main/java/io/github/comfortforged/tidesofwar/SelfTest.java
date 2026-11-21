@@ -1,4 +1,4 @@
-package io.github.comfortforged.pirateships;
+package io.github.comfortforged.tidesofwar;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -41,7 +41,7 @@ final class SelfTest {
 	}
 
 	private static void check(boolean ok, String what) {
-		PirateShips.LOGGER.info("SELFTEST {} {}", ok ? "ok  " : "FAIL", what);
+		TidesOfWar.LOGGER.info("SELFTEST {} {}", ok ? "ok  " : "FAIL", what);
 		if (!ok) failures.add(what);
 	}
 
@@ -69,7 +69,7 @@ final class SelfTest {
 		check(m != null, "ship manager started");
 		for (String r : new String[]{"pirate_sloop", "pirate_brigantine", "pirate_galleon"}) {
 			var key = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,
-					net.minecraft.resources.Identifier.fromNamespaceAndPath(PirateShips.MOD_ID, r));
+					net.minecraft.resources.Identifier.fromNamespaceAndPath(TidesOfWar.MOD_ID, r));
 			check(server.getRecipeManager().byKey(key).isPresent(), "recipe " + r + " loaded");
 		}
 		ShipType[] types = ShipType.values();
@@ -87,7 +87,7 @@ final class SelfTest {
 	}
 
 	private static void s(int n) {
-		PirateShips.LOGGER.info("SELFTEST launched {} ships", n);
+		TidesOfWar.LOGGER.info("SELFTEST launched {} ships", n);
 	}
 
 	private static void step(MinecraftServer server) {
@@ -160,19 +160,54 @@ final class SelfTest {
 			for (Ship s : new ArrayList<>(m.ships())) m.packUp(s);
 			long left = 0;
 			for (Entity e : level.getAllEntities()) {
-				if (e.entityTags().contains(Ship.PART_TAG) && !e.isRemoved()) left++;
+				if (Ship.isPart(e) && !e.isRemoved()) left++;
 			}
 			check(left == 0, "no ship entities left over (" + left + ")");
 			check(ShipItems.typeOf(ShipItems.create(ShipType.SLOOP)) == ShipType.SLOOP, "ship item round trip");
 			check(ShipItems.typeOf(new ItemStack(Items.DARK_OAK_BOAT)) == null, "plain boats are not ships");
+			checkLegacy(level, m);
 
 			if (failures.isEmpty()) {
-				PirateShips.LOGGER.info("PIRATESHIPS SELFTEST PASS");
+				TidesOfWar.LOGGER.info("TIDESOFWAR SELFTEST PASS");
 			} else {
-				PirateShips.LOGGER.error("PIRATESHIPS SELFTEST FAIL: {}", failures);
+				TidesOfWar.LOGGER.error("TIDESOFWAR SELFTEST FAIL: {}", failures);
 			}
 			ships.clear();
 			server.halt(false);
+		}
+	}
+
+	/** Checks that data from before the rename (pirateships) is still understood. */
+	private void checkLegacy(ServerLevel level, ShipManager m) {
+		// Old item key
+		ItemStack old = new ItemStack(Items.DARK_OAK_BOAT);
+		net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+		tag.putString(ShipItems.LEGACY_TYPE_KEY, "brigantine");
+		old.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+		check(ShipItems.typeOf(old) == ShipType.BRIGANTINE, "old pirateships_type item still recognised");
+		// Old entity tag
+		net.minecraft.world.entity.Interaction part = new net.minecraft.world.entity.Interaction(
+				net.minecraft.world.entity.EntityTypes.INTERACTION, level);
+		part.addTag(Ship.LEGACY_PART_TAG);
+		check(Ship.isPart(part), "old pirateships_part tag still recognised as a leftover");
+		// Old data file
+		try {
+			java.nio.file.Path legacy = m.legacyFile();
+			java.nio.file.Path current = m.file();
+			java.nio.file.Files.deleteIfExists(current);
+			java.nio.file.Files.createDirectories(legacy.getParent());
+			String id = java.util.UUID.randomUUID().toString();
+			java.nio.file.Files.writeString(legacy, "{\"version\":1,\"ships\":[{\"id\":\"" + id
+					+ "\",\"type\":\"sloop\",\"dimension\":\"minecraft:overworld\",\"x\":0.5,\"y\":64.0,\"z\":0.5,"
+					+ "\"yaw\":0.0,\"ownerName\":\"Old\",\"cargo\":[]}]}");
+			m.load();
+			check(m.ships().size() == 1 && m.ships().iterator().next().id.toString().equals(id), "old pirateships/ships.json loaded");
+			check(java.nio.file.Files.exists(current), "old ships migrated to tidesofwar/ships.json");
+			java.nio.file.Files.deleteIfExists(legacy);
+			java.nio.file.Files.deleteIfExists(current);
+			m.load();
+		} catch (java.io.IOException e) {
+			check(false, "legacy data check threw " + e);
 		}
 	}
 
