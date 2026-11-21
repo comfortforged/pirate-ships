@@ -55,3 +55,6 @@ net.minecraft.world.entity.player.Inventory
 net.minecraft.world.item.Items
 net.minecraft.world.item.DyeColor
 net.minecraft.world.inventory.ChestMenu
+net.minecraft.world.entity.EntityTypes
+net.minecraft.world.level.block.ColorCollection
+net.minecraft.util.Prediction
