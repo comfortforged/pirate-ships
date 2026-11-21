@@ -1,5 +1,11 @@
 name: build
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -28,28 +34,26 @@ jobs:
             javap -p -cp "$CP" "$c" >> api.txt 2>&1 || true
           done < .github/api-classes.txt
       - name: server self-test
-        if: steps.build.outcome == 'success'
+        if: steps.build.outcome == 'success' && hashFiles('**/SelfTest.java') != ''
         continue-on-error: true
         env:
           PIRATESHIPS_SELFTEST: "1"
         run: |
           mkdir -p run && echo "eula=true" > run/eula.txt
-          printf "online-mode=false\nlevel-type=minecraft\\:flat\nspawn-protection=0\n" > run/server.properties
-          timeout 900 ./gradlew runServer 2>&1 | tee server.log || true
+          printf "online-mode=false\nlevel-type=minecraft\\:flat\nspawn-protection=0\npause-when-empty-seconds=-1\n" > run/server.properties
+          timeout 600 ./gradlew runServer 2>&1 | tee server.log || true
           grep -q "PIRATESHIPS SELFTEST PASS" server.log
-      - uses: actions/upload-artifact@v7
+      - name: publish outputs to ci-output branch
         if: always()
-        with:
-          name: logs
-          path: |
-            build.log
-            api.txt
-            server.log
-      - uses: actions/upload-artifact@v7
-        if: steps.build.outcome == 'success'
-        with:
-          name: pirate-ships-jar
-          path: build/libs/
+        run: |
+          mkdir -p /tmp/out && cp -f build.log api.txt server.log /tmp/out/ 2>/dev/null || true
+          cp -f build/libs/*.jar /tmp/out/ 2>/dev/null || true
+          echo "${{ github.sha }} build=${{ steps.build.outcome }}" > /tmp/out/STATUS.txt
+          cd /tmp/out
+          git init -q -b ci-output
+          git config user.name "ci"; git config user.email "ci@users.noreply.github.com"
+          git add -A && git commit -qm "CI output for ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-output
       - name: fail if build failed
         if: steps.build.outcome != 'success'
         run: exit 1
