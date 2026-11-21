@@ -1,4 +1,4 @@
-package io.github.comfortforged.tidesofwar;
+package io.github.comfortforged.tidesofwar.core;
 
 import com.mojang.math.Transformation;
 import net.minecraft.ChatFormatting;

@@ -1,7 +1,5 @@
-package io.github.comfortforged.tidesofwar;
+package io.github.comfortforged.tidesofwar.core;
 
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -35,17 +33,12 @@ final class SelfTest {
 
 	private SelfTest() {}
 
-	static void install() {
-		ServerLifecycleEvents.SERVER_STARTED.register(SelfTest::setup);
-		ServerTickEvents.END_SERVER_TICK.register(SelfTest::step);
-	}
-
 	private static void check(boolean ok, String what) {
 		TidesOfWar.LOGGER.info("SELFTEST {} {}", ok ? "ok  " : "FAIL", what);
 		if (!ok) failures.add(what);
 	}
 
-	private static void setup(MinecraftServer server) {
+	public static void setup(MinecraftServer server) {
 		ServerLevel level = server.overworld();
 		for (int cx = -5; cx <= 5; cx++) {
 			for (int cz = -5; cz <= 5; cz++) level.setChunkForced(cx, cz, true);
@@ -90,7 +83,7 @@ final class SelfTest {
 		TidesOfWar.LOGGER.info("SELFTEST launched {} ships", n);
 	}
 
-	private static void step(MinecraftServer server) {
+	public static void step(MinecraftServer server) {
 		if (ships.isEmpty()) return;
 		tick++;
 		ServerLevel level = server.overworld();

@@ -1,4 +1,4 @@
-package io.github.comfortforged.tidesofwar;
+package io.github.comfortforged.tidesofwar.core;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;

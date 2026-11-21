@@ -1,4 +1,4 @@
-package io.github.comfortforged.tidesofwar;
+package io.github.comfortforged.tidesofwar.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -60,12 +60,12 @@ public final class ShipManager {
 		return instance;
 	}
 
-	static void start(MinecraftServer server) {
+	public static void start(MinecraftServer server) {
 		instance = new ShipManager(server);
 		instance.load();
 	}
 
-	static void stop() {
+	public static void stop() {
 		if (instance == null) return;
 		for (Ship s : instance.ships.values()) s.despawn(instance);
 		instance.save();
@@ -91,7 +91,7 @@ public final class ShipManager {
 	}
 
 	/** Called whenever an entity loads; old saved copies of ship parts get cleaned up. */
-	void onEntityLoad(Entity e) {
+	public void onEntityLoad(Entity e) {
 		if (Ship.isPart(e) && !partOwners.containsKey(e.getUUID())) {
 			staleParts.add(e);
 		}
@@ -99,7 +99,7 @@ public final class ShipManager {
 
 	// ------------------------------------------------------------------ ticking
 
-	void tickLevel(ServerLevel level) {
+	public void tickLevel(ServerLevel level) {
 		if (!staleParts.isEmpty()) {
 			for (Entity e : staleParts) {
 				if (!e.isRemoved()) {
@@ -219,12 +219,12 @@ public final class ShipManager {
 
 	// ------------------------------------------------------------------ saving
 
-	Path file() {
+	public Path file() {
 		return server.getWorldPath(LevelResource.ROOT).resolve("tidesofwar").resolve("ships.json");
 	}
 
 	/** Where ships were saved before the rename to Tides of War. */
-	Path legacyFile() {
+	public Path legacyFile() {
 		return server.getWorldPath(LevelResource.ROOT).resolve("pirateships").resolve("ships.json");
 	}
 
@@ -279,7 +279,7 @@ public final class ShipManager {
 		}
 	}
 
-	void load() {
+	public void load() {
 		ships.clear();
 		Path f = file();
 		boolean migrated = false;

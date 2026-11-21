@@ -1,4 +1,4 @@
-package io.github.comfortforged.tidesofwar;
+package io.github.comfortforged.tidesofwar.core;
 
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;

@@ -8,7 +8,7 @@
 	"license": "All Rights Reserved",
 	"environment": "*",
 	"entrypoints": {
-		"main": ["io.github.comfortforged.tidesofwar.TidesOfWar"]
+		"main": ["io.github.comfortforged.tidesofwar.platform.TidesOfWarFabric"]
 	},
 	"depends": {
 		"fabricloader": ">=0.19.5",
