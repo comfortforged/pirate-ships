@@ -145,8 +145,8 @@ public class PirateShips implements ModInitializer {
 	}
 
 	static void giveOrDrop(ServerPlayer player, ItemStack item) {
-		if (!player.getInventory().add(item)) {
-			player.drop(item, false);
+		{
+			player.getInventory().placeItemBackInInventory(item, net.minecraft.util.Prediction.SERVER_ONLY);
 		}
 	}
 

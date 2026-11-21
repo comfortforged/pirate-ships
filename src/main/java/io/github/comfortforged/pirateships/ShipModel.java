@@ -63,7 +63,7 @@ public final class ShipModel {
 		BlockState deck = Blocks.SPRUCE_PLANKS.defaultBlockState();
 		BlockState trim = Blocks.STRIPPED_DARK_OAK_LOG.defaultBlockState();
 		BlockState spar = Blocks.STRIPPED_SPRUCE_LOG.defaultBlockState();
-		BlockState sail = Blocks.WHITE_WOOL.defaultBlockState();
+		BlockState sail = Blocks.WOOL.white().defaultBlockState();
 
 		final int len = type.length;
 		final float stern = -len / 2f;
@@ -144,8 +144,8 @@ public final class ShipModel {
 				add(deck, -0.9f, h - 1.3f, mz - 0.9f, 1.8f, 0.15f, 1.8f);
 				add(trim, -0.9f, h - 1.15f, mz - 0.9f, 1.8f, 0.45f, 0.12f);
 				add(trim, -0.9f, h - 1.15f, mz + 0.78f, 1.8f, 0.45f, 0.12f);
-				add(Blocks.BLACK_WOOL.defaultBlockState(), 0.3f, h - 0.1f, mz - 0.05f, 2.0f, 1.2f, 0.1f);
-				add(Blocks.WHITE_CONCRETE.defaultBlockState(), 1.05f, h + 0.25f, mz - 0.08f, 0.5f, 0.5f, 0.16f);
+				add(Blocks.WOOL.black().defaultBlockState(), 0.3f, h - 0.1f, mz - 0.05f, 2.0f, 1.2f, 0.1f);
+				add(Blocks.CONCRETE.white().defaultBlockState(), 1.05f, h + 0.25f, mz - 0.08f, 0.5f, 0.5f, 0.16f);
 			}
 		}
 

@@ -10,7 +10,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.level.block.state.BlockState;
@@ -115,7 +115,7 @@ public class Ship {
 		spawned = true;
 		ShipModel m = model();
 		for (ShipModel.Part p : m.parts) {
-			Display.BlockDisplay d = new Display.BlockDisplay(EntityType.BLOCK_DISPLAY, level);
+			Display.BlockDisplay d = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
 			d.setBlockState(p.block());
 			d.setTransformation(new Transformation(
 					new Vector3f(p.x(), p.y(), p.z()),
@@ -128,7 +128,7 @@ public class Ship {
 			add(level, manager, d);
 		}
 		for (int i = 0; i < m.seats.size(); i++) {
-			Display.ItemDisplay seat = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, level);
+			Display.ItemDisplay seat = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, level);
 			seat.setPosRotInterpolationDuration(2);
 			seats.add(seat);
 			add(level, manager, seat);
@@ -146,7 +146,7 @@ public class Ship {
 	}
 
 	private static Interaction button(ServerLevel level, float w, float h) {
-		Interaction b = new Interaction(EntityType.INTERACTION, level);
+		Interaction b = new Interaction(EntityTypes.INTERACTION, level);
 		b.setWidth(w);
 		b.setHeight(h);
 		b.setResponse(true);
