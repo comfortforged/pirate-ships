@@ -62,3 +62,14 @@ net.minecraft.world.item.crafting.RecipeManager
 net.minecraft.world.item.crafting.RecipeHolder
 net.minecraft.core.registries.Registries
 net.minecraft.world.item.crafting.Recipe
+net.neoforged.neoforge.event.server.ServerStartedEvent
+net.neoforged.neoforge.event.server.ServerStoppingEvent
+net.neoforged.neoforge.event.level.LevelEvent$Save
+net.neoforged.neoforge.event.tick.LevelTickEvent$Post
+net.neoforged.neoforge.event.tick.ServerTickEvent$Post
+net.neoforged.neoforge.event.entity.EntityJoinLevelEvent
+net.neoforged.neoforge.event.entity.player.PlayerEvent$PlayerLoggedOutEvent
+net.neoforged.neoforge.event.entity.player.PlayerInteractEvent$RightClickItem
+net.neoforged.neoforge.event.entity.player.PlayerInteractEvent$EntityInteract
+net.neoforged.neoforge.event.RegisterCommandsEvent
+net.neoforged.bus.api.IEventBus

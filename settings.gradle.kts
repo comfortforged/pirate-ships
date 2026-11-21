@@ -22,9 +22,9 @@ stonecutter {
             for (loader in loaders) version("$project-$loader", version).buildscript("build.$loader.gradle.kts")
         }
 
-        match("26.1", "fabric", version = "26.1.2")
-        match("26.2", "fabric")
-        match("26.3", "fabric")
+        match("26.1", "fabric", "neoforge", version = "26.1.2")
+        match("26.2", "fabric", "neoforge")
+        match("26.3", "fabric", "neoforge")
         vcsVersion = "26.3-fabric"
     }
 }
