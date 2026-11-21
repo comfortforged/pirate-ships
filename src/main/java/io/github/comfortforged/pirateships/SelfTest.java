@@ -67,6 +67,11 @@ final class SelfTest {
 
 		ShipManager m = ShipManager.get();
 		check(m != null, "ship manager started");
+		for (String r : new String[]{"pirate_sloop", "pirate_brigantine", "pirate_galleon"}) {
+			var key = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,
+					net.minecraft.resources.Identifier.fromNamespaceAndPath(PirateShips.MOD_ID, r));
+			check(server.getRecipeManager().byKey(key).isPresent(), "recipe " + r + " loaded");
+		}
 		ShipType[] types = ShipType.values();
 		int[] lanes = {-40, 0, 40};
 		startZ = new double[types.length];
