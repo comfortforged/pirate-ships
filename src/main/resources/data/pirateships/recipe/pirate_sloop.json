@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " W ",
+    "WWW",
+    "PBP"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "P": "#minecraft:planks",
+    "B": "#minecraft:boats"
+  },
+  "result": {
+    "id": "minecraft:dark_oak_boat",
+    "count": 1,
+    "components": {
+      "minecraft:custom_data": {
+        "pirateships_type": "sloop"
+      },
+      "minecraft:item_name": {
+        "text": "Pirate Sloop",
+        "color": "gold"
+      },
+      "minecraft:enchantment_glint_override": true,
+      "minecraft:rarity": "rare",
+      "minecraft:lore": [
+        {
+          "text": "Right-click on open water to launch",
+          "color": "gray",
+          "italic": false
+        },
+        {
+          "text": "27 cargo slots, 3 passenger seats",
+          "color": "dark_gray",
+          "italic": false
+        }
+      ]
+    }
+  }
+}

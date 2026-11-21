@@ -1,0 +1,43 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WDW",
+    "WIW",
+    "LBL"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "D": "minecraft:diamond",
+    "I": "minecraft:iron_block",
+    "L": "#minecraft:logs",
+    "B": "#minecraft:boats"
+  },
+  "result": {
+    "id": "minecraft:dark_oak_boat",
+    "count": 1,
+    "components": {
+      "minecraft:custom_data": {
+        "pirateships_type": "galleon"
+      },
+      "minecraft:item_name": {
+        "text": "Pirate Galleon",
+        "color": "gold"
+      },
+      "minecraft:enchantment_glint_override": true,
+      "minecraft:rarity": "rare",
+      "minecraft:lore": [
+        {
+          "text": "Right-click on open water to launch",
+          "color": "gray",
+          "italic": false
+        },
+        {
+          "text": "54 cargo slots, 7 passenger seats",
+          "color": "dark_gray",
+          "italic": false
+        }
+      ]
+    }
+  }
+}
