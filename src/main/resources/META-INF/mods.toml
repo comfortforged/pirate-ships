@@ -1,0 +1,24 @@
+modLoader = "javafml"
+loaderVersion = "[${forge_major},)"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "${id}"
+version = "${version}"
+displayName = "${name}"
+authors = "comfortforged"
+description = "Command the seas: summon huge sailable pirate ships with giant sails from your inventory. Server-side only; players don't need the mod."
+
+[[dependencies.${id}]]
+modId = "forge"
+mandatory = true
+versionRange = "[${forge_major},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${id}]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${minecraft}"
+ordering = "NONE"
+side = "BOTH"

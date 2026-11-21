@@ -56,7 +56,7 @@ tasks {
         )
         props.forEach { (k, v) -> inputs.property(k, v) }
         filesMatching("META-INF/neoforge.mods.toml") { expand(props) }
-        exclude("fabric.mod.json", "META-INF/mods.toml")
+        exclude("fabric.mod.json", "META-INF/mods.toml", "pack.mcmeta")
     }
 
     named("createMinecraftArtifacts") {

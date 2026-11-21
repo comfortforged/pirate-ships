@@ -27,6 +27,15 @@ jobs:
           - node: 26.3-neoforge
             loader: neoforge
             mc: "26.3"
+          - node: 26.1-forge
+            loader: forge
+            mc: "26.1.2"
+          - node: 26.2-forge
+            loader: forge
+            mc: "26.2"
+          - node: 26.3-forge
+            loader: forge
+            mc: "26.3"
           - node: 26.2-fabric
             loader: fabric
             mc: "26.2"
@@ -58,6 +67,18 @@ jobs:
             echo "===== $c" >> api.txt
             javap -p -cp "$CP" "$c" >> api.txt 2>&1 || true
           done < .github/api-classes.txt
+      - name: list mod loader event classes and pack version
+        if: always()
+        continue-on-error: true
+        run: |
+          CP=$(./gradlew -q ":${{ matrix.node }}:printClasspath" | grep '^CLASSPATH=' | sed 's/^CLASSPATH=//')
+          : > events.txt
+          for j in $(echo "$CP" | tr ':' ' '); do
+            case "$j" in
+              *forge*|*neoforge*) unzip -l "$j" 2>/dev/null | awk '{print $4}' | grep -E "/event/|FMLJavaModLoadingContext|ModLoadingContext" >> events.txt ;;
+              *minecraft*|*client-extra*|*server*) unzip -p "$j" version.json 2>/dev/null | head -c 600 >> events.txt ;;
+            esac
+          done
       - name: server self-test
         id: selftest
         if: steps.build.outcome == 'success'
@@ -99,7 +120,7 @@ jobs:
         if: always()
         run: |
           mkdir -p out
-          cp -f build.log api.txt server.log out/ 2>/dev/null || true
+          cp -f build.log api.txt events.txt server.log out/ 2>/dev/null || true
           echo "${{ matrix.node }} build=${{ steps.build.outcome }} selftest=${{ steps.selftest.outcome }}" > out/STATUS.txt
       - uses: actions/upload-artifact@v4
         if: always()
