@@ -180,7 +180,7 @@ final class SelfTest {
 		check(ShipItems.typeOf(old) == ShipType.BRIGANTINE, "old pirateships_type item still recognised");
 		// Old entity tag
 		net.minecraft.world.entity.Interaction part = new net.minecraft.world.entity.Interaction(
-				net.minecraft.world.entity.EntityTypes.INTERACTION, level);
+				Compat.interaction(), level);
 		part.addTag(Ship.LEGACY_PART_TAG);
 		check(Ship.isPart(part), "old pirateships_part tag still recognised as a leftover");
 		// Old data file

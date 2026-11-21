@@ -109,7 +109,7 @@ public final class ShipInteractions {
 
 	static void giveOrDrop(ServerPlayer player, ItemStack item) {
 		{
-			player.getInventory().placeItemBackInInventory(item, net.minecraft.util.Prediction.SERVER_ONLY);
+			Compat.giveBack(player, item);
 		}
 	}
 }

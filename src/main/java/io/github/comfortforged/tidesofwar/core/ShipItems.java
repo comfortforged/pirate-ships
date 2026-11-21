@@ -58,7 +58,7 @@ public final class ShipItems {
 	public static List<ItemStack> readCargo(ItemStack stack) {
 		ItemContainerContents c = stack.get(net.minecraft.core.component.DataComponents.CONTAINER);
 		List<ItemStack> out = new ArrayList<>();
-		if (c != null) c.itemCopies().forEach(out::add);
+		if (c != null) Compat.itemCopies(c).forEach(out::add);
 		return out;
 	}
 }
