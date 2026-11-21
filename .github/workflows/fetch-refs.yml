@@ -1,0 +1,34 @@
+name: fetch-refs
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: |
+          mkdir -p /tmp/refs && cd /tmp/refs
+          git clone -q --depth 1 https://codeberg.org/stonecutter/template-multiloader sc-template && rm -rf sc-template/.git || echo "sc clone failed"
+          git clone -q --depth 1 https://codeberg.org/stonecutter/stonecutter-docs sc-docs 2>/dev/null && rm -rf sc-docs/.git || echo "docs clone failed"
+          mkdir -p meta
+          for u in \
+            https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml \
+            https://maven.fabricmc.net/net/fabricmc/fabric-loader/maven-metadata.xml \
+            https://maven.fabricmc.net/fabric-loom/fabric-loom.gradle.plugin/maven-metadata.xml \
+            https://maven.fabricmc.net/net/fabricmc/fabric-loom/net.fabricmc.fabric-loom.gradle.plugin/maven-metadata.xml \
+            https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml \
+            https://maven.neoforged.net/releases/net/neoforged/moddev/net.neoforged.moddev.gradle.plugin/maven-metadata.xml \
+            https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml \
+            https://maven.minecraftforge.net/net/minecraftforge/gradle/ForgeGradle/maven-metadata.xml \
+            https://maven.kikugie.dev/releases/dev/kikugie/stonecutter/dev.kikugie.stonecutter.gradle.plugin/maven-metadata.xml \
+            ; do n=$(echo $u | sed 's#https://##; s#/#_#g'); curl -sfL "$u" -o "meta/$n" || echo "fail $u"; done
+          FV=$(grep -o '26\.3-[0-9.]*' meta/maven.minecraftforge.net_net_minecraftforge_forge_maven-metadata.xml | tail -1)
+          echo "forge $FV"
+          curl -sfL "https://maven.minecraftforge.net/net/minecraftforge/forge/$FV/forge-$FV-mdk.zip" -o forge-mdk-26.3.zip && mkdir forge-mdk-26.3 && cd forge-mdk-26.3 && unzip -q ../forge-mdk-26.3.zip && cd .. && rm forge-mdk-26.3.zip
+          F1=$(grep -o '1\.21\.1-[0-9.]*' meta/maven.minecraftforge.net_net_minecraftforge_forge_maven-metadata.xml | tail -1)
+          curl -sfL "https://maven.minecraftforge.net/net/minecraftforge/forge/$F1/forge-$F1-mdk.zip" -o f.zip && mkdir forge-mdk-1.21.1 && cd forge-mdk-1.21.1 && unzip -q ../f.zip && cd .. && rm f.zip
+          for r in MDK-26.3-ModDevGradle MDK-1.21.1-ModDevGradle; do git clone -q --depth 1 https://github.com/NeoForgeMDKs/$r neo-$r && rm -rf neo-$r/.git || echo "no $r"; done
+          ls -R | head -100
+          git init -q -b refs && git config user.name ci && git config user.email ci@users.noreply.github.com
+          git add -A && git commit -qm refs && git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" refs
