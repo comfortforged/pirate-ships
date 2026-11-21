@@ -99,11 +99,13 @@ final class SelfTest {
 				s.testInput = FORWARD;
 			}
 		}
+		if (tick == 60) {
+			for (Ship s : ships) check(s.speed > 0, s.type.id() + " is picking up speed (" + String.format("%.3f", s.speed) + ")");
+		}
 		if (tick == 200) {
 			for (int i = 0; i < ships.size(); i++) {
 				Ship s = ships.get(i);
 				check(s.z > startZ[i] + 5, s.type.id() + " sailed forward (z " + String.format("%.1f -> %.1f", startZ[i], s.z) + ")");
-				check(s.speed > 0, s.type.id() + " is moving");
 			}
 		}
 		if (tick == 1500) {

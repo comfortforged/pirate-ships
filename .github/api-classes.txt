@@ -58,3 +58,7 @@ net.minecraft.world.inventory.ChestMenu
 net.minecraft.world.entity.EntityTypes
 net.minecraft.world.level.block.ColorCollection
 net.minecraft.util.Prediction
+net.minecraft.world.item.crafting.RecipeManager
+net.minecraft.world.item.crafting.RecipeHolder
+net.minecraft.core.registries.Registries
+net.minecraft.world.item.crafting.Recipe
