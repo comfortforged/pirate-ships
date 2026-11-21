@@ -49,3 +49,9 @@ net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents$Disconnect
+net.minecraft.world.entity.EntityType
+net.minecraft.world.level.block.Blocks
+net.minecraft.world.entity.player.Inventory
+net.minecraft.world.item.Items
+net.minecraft.world.item.DyeColor
+net.minecraft.world.inventory.ChestMenu
