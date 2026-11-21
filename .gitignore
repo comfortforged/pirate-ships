@@ -1,4 +1,5 @@
 .gradle/
+versions/*/build/
 build/
 run/
 out/

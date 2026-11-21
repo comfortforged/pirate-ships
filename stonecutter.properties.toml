@@ -1,0 +1,14 @@
+mod.id = "tidesofwar"
+mod.name = "Tides of War"
+mod.group = "io.github.comfortforged"
+mod.version = "0.1.0"
+
+deps.fabric_loader = "0.20.1"
+loomx.loom_version = "1.19-SNAPSHOT"
+
+["26.3"]
+mod.mc_releases = ["26.3"]
+
+[fabric."26.3"]
+mod.mc_compat = "~26.3"
+deps.fabric_api = "0.166.2+26.3"

@@ -10,6 +10,14 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - node: 26.3-fabric
+            loader: fabric
+            mc: "26.3"
+            fapi: "0.166.2+26.3"
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
@@ -21,12 +29,12 @@ jobs:
       - name: build
         id: build
         continue-on-error: true
-        run: ./gradlew build --stacktrace 2>&1 | tee build.log; exit ${PIPESTATUS[0]}
+        run: ./gradlew ":${{ matrix.node }}:build" --stacktrace 2>&1 | tee build.log; exit ${PIPESTATUS[0]}
       - name: dump Minecraft API signatures
         if: always()
         continue-on-error: true
         run: |
-          CP=$(./gradlew -q printClasspath | grep '^CLASSPATH=' | sed 's/^CLASSPATH=//')
+          CP=$(./gradlew -q ":${{ matrix.node }}:printClasspath" | grep '^CLASSPATH=' | sed 's/^CLASSPATH=//')
           : > api.txt
           while read -r c; do
             [ -z "$c" ] && continue
@@ -34,27 +42,30 @@ jobs:
             javap -p -cp "$CP" "$c" >> api.txt 2>&1 || true
           done < .github/api-classes.txt
       - name: server self-test
-        if: steps.build.outcome == 'success' && hashFiles('**/SelfTest.java') != ''
+        id: selftest
+        if: steps.build.outcome == 'success'
         continue-on-error: true
         env:
           TIDESOFWAR_SELFTEST: "1"
         run: |
           mkdir -p run && echo "eula=true" > run/eula.txt
           printf "online-mode=false\nlevel-type=minecraft\\:flat\nspawn-protection=0\npause-when-empty-seconds=-1\n" > run/server.properties
-          timeout 600 ./gradlew runServer 2>&1 | tee server.log || true
+          timeout 600 ./gradlew ":${{ matrix.node }}:runServer" 2>&1 | tee server.log || true
           grep -q "TIDESOFWAR SELFTEST PASS" server.log
-      - name: package server files and CurseForge profile
+      - name: package
         if: steps.build.outcome == 'success'
         run: |
-          FAPI=$(find ~/.gradle/caches -name "fabric-api-${FAPI_VER}.jar" | head -1)
-          [ -z "$FAPI" ] && curl -sfLo /tmp/fabric-api.jar "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/${FAPI_VER}/fabric-api-${FAPI_VER}.jar" && FAPI=/tmp/fabric-api.jar
-          MOD=$(ls build/libs/tides-of-war-*.jar | grep -v sources | head -1)
-          mkdir -p dist/server-mods dist/profile/overrides/mods
-          cp "$MOD" dist/server-mods/ && cp "$FAPI" "dist/server-mods/fabric-api-${FAPI_VER}.jar"
-          cp dist/server-mods/*.jar dist/profile/overrides/mods/
-          cat > dist/profile/manifest.json <<JSON
+          mkdir -p out
+          find versions/${{ matrix.node }}/build/libs -name 'tides-of-war-*.jar' ! -name '*-sources.jar' -exec cp {} out/ \;
+          if [ "${{ matrix.loader }}" = fabric ] && [ "${{ matrix.node }}" = 26.3-fabric ]; then
+            FAPI="${{ matrix.fapi }}"
+            curl -sfLo "/tmp/fabric-api-$FAPI.jar" "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FAPI/fabric-api-$FAPI.jar" || cp $(find ~/.gradle/caches -name "fabric-api-$FAPI.jar" | head -1) "/tmp/fabric-api-$FAPI.jar"
+            mkdir -p dist/server-mods dist/profile/overrides/mods
+            cp out/*.jar dist/server-mods/ && cp "/tmp/fabric-api-$FAPI.jar" dist/server-mods/
+            cp dist/server-mods/*.jar dist/profile/overrides/mods/
+            cat > dist/profile/manifest.json <<JSON
           {
-            "minecraft": { "version": "26.3", "modLoaders": [ { "id": "fabric-${LOADER_VER}", "primary": true } ] },
+            "minecraft": { "version": "26.3", "modLoaders": [ { "id": "fabric-0.20.1", "primary": true } ] },
             "manifestType": "minecraftModpack",
             "manifestVersion": 1,
             "name": "Tides of War",
@@ -64,23 +75,39 @@ jobs:
             "overrides": "overrides"
           }
           JSON
-          (cd dist/profile && zip -qr ../TidesOfWar-CurseForge-Profile.zip .)
-          (cd dist/server-mods && zip -qr ../TidesOfWar-Server-Mods.zip .)
-          ls -la dist
-        env:
-          FAPI_VER: "0.166.2+26.3"
-          LOADER_VER: "0.20.1"
-      - name: publish outputs to ci-output branch
+            (cd dist/profile && zip -qr ../../out/TidesOfWar-CurseForge-Profile.zip .)
+            (cd dist/server-mods && zip -qr ../../out/TidesOfWar-Server-Fabric-26.3.zip .)
+          fi
+      - name: collect
         if: always()
         run: |
-          mkdir -p /tmp/out && cp -f build.log api.txt server.log /tmp/out/ 2>/dev/null || true
-          cp -f build/libs/*.jar dist/*.zip /tmp/out/ 2>/dev/null || true
-          echo "${{ github.sha }} build=${{ steps.build.outcome }}" > /tmp/out/STATUS.txt
+          mkdir -p out
+          cp -f build.log api.txt server.log out/ 2>/dev/null || true
+          echo "${{ matrix.node }} build=${{ steps.build.outcome }} selftest=${{ steps.selftest.outcome }}" > out/STATUS.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: out-${{ matrix.node }}
+          path: out
+
+  publish:
+    needs: build
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: collected
+      - name: publish outputs to ci-output branch
+        run: |
+          mkdir -p /tmp/out
+          for d in collected/out-*; do n=${d#collected/out-}; mkdir -p "/tmp/out/$n"; cp -r "$d"/. "/tmp/out/$n/"; done
+          { echo "${{ github.sha }}"; cat /tmp/out/*/STATUS.txt; } > /tmp/out/STATUS.txt
           cd /tmp/out
           git init -q -b ci-output
           git config user.name "ci"; git config user.email "ci@users.noreply.github.com"
           git add -A && git commit -qm "CI output for ${{ github.sha }}"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-output
-      - name: fail if build failed
-        if: steps.build.outcome != 'success'
-        run: exit 1
+      - name: fail if any node failed
+        run: |
+          ! grep -E "build=(failure|cancelled)|selftest=(failure|cancelled)" /tmp/out/STATUS.txt
