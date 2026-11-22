@@ -246,6 +246,88 @@ final class SelfTest {
 		if (t == 260) {
 			check(target.hull == targetHullBefore, "same owner, friendlyFire=false: no hull damage");
 			Config.current = new Config();
+			m.packUp(attacker);
+			m.packUp(target);
+			startImpactTests(level, m);
+		}
+		if (t >= 265) impactStep(server, level, m, t - 265);
+	}
+
+	// ------------------------------------------------------------------ impacts on mobs and blocks
+
+	private static Ship gun;
+	private static int tx, cz;
+	private static double mz;
+	private static net.minecraft.world.entity.decoration.ArmorStand stand;
+
+	private static void startImpactTests(ServerLevel level, ShipManager m) {
+		ships.clear();
+		gun = new Ship(UUID.randomUUID(), ShipType.SLOOP, ShipManager.dimensionId(level), -10.5, Y + 1 - Ship.DRAFT, 10.5, 0f,
+				UUID.randomUUID(), "gun");
+		gun.cargo.setItem(0, new ItemStack(Items.GUNPOWDER, 64));
+		m.addShip(gun);
+		ships.add(gun);
+		ShipModel.Cannon c = ShipModel.of(ShipType.SLOOP).cannons.stream().filter(k -> k.side() == ShipModel.PORT).findFirst().orElseThrow();
+		net.minecraft.world.phys.Vec3 muzzle = gun.toWorld(new org.joml.Vector3f(c.x() + 0.6f, c.y(), c.z()));
+		tx = (int) Math.floor(muzzle.x) + 8;
+		cz = (int) Math.floor(muzzle.z);
+		mz = muzzle.z;
+	}
+
+	private static void fireGun(ServerLevel level) {
+		gun.setReload(ShipModel.PORT, 0);
+		check(Cannons.tryFire(level, gun, ShipModel.PORT, null, -90f, 0f), "gun fires");
+	}
+
+	private static void plate(ServerLevel level, BlockState state) {
+		for (int dz = -1; dz <= 1; dz++) {
+			for (int y = Y + 1; y <= Y + 2; y++) level.setBlock(new BlockPos(tx, y, cz + dz), state, 2);
+		}
+	}
+
+	private static void impactStep(MinecraftServer server, ServerLevel level, ShipManager m, int t) {
+		BlockState glass = Blocks.GLASS.defaultBlockState();
+		BlockState air = Blocks.AIR.defaultBlockState();
+		if (t == 10) {
+			level.setBlock(new BlockPos(tx, Y, cz), glass, 2);
+			stand = new net.minecraft.world.entity.decoration.ArmorStand(level, tx + 0.5, Y + 1, mz);
+			level.addFreshEntity(stand);
+			fireGun(level);
+		}
+		if (t == 40) {
+			check(!stand.isAlive(), "mobs=true: the target in the line of fire was destroyed");
+			stand = new net.minecraft.world.entity.decoration.ArmorStand(level, tx + 0.5, Y + 1, mz);
+			level.addFreshEntity(stand);
+			Config.current.damage.mobs = false;
+			level.setBlock(new BlockPos(tx, Y, cz), glass, 2);
+			fireGun(level);
+		}
+		if (t == 70) {
+			check(stand.isAlive(), "mobs=false: the target was left alone");
+			stand.discard();
+			Config.current.damage.mobs = true;
+			plate(level, glass);
+			fireGun(level);
+		}
+		if (t == 100) {
+			check(level.getBlockState(new BlockPos(tx, Y + 1, cz)).isAir(), "blockDamage=true: the glass target is gone");
+			Config.current.damage.blockDamage = false;
+			plate(level, glass);
+			fireGun(level);
+		}
+		if (t == 130) {
+			check(level.getBlockState(new BlockPos(tx, Y + 1, cz)).is(Blocks.GLASS), "blockDamage=false: the glass target is intact");
+			plate(level, air);
+			Config.current = new Config();
+			m.packUp(gun);
+			ships.clear();
+			ships.add(gun);
+			finish(server);
+		}
+	}
+
+	private static void finish(MinecraftServer server) {
+		{
 			if (failures.isEmpty()) {
 				TidesOfWar.LOGGER.info("TIDESOFWAR SELFTEST PASS");
 			} else {

@@ -101,3 +101,5 @@ net.minecraft.server.MinecraftServer
 net.minecraft.server.level.ServerLevel
 net.minecraft.tags.ItemTags
 net.minecraft.world.entity.player.Input
+net.minecraft.world.level.Level$ExplosionInteraction
+net.minecraft.world.entity.decoration.ArmorStand
