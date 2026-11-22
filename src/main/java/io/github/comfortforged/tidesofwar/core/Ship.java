@@ -370,6 +370,11 @@ public class Ship {
 					new Quaternionf()));
 			Compat.setPosRotInterpolationDuration(d, 2);
 			Compat.setViewRange(d, 3.0f);
+			if (parts.isEmpty()) {
+				// The first part marks the ship for the client mod: its name says which kind of ship this is.
+				d.setCustomName(Component.literal(ANCHOR_PREFIX + type.name().toLowerCase(java.util.Locale.ROOT)));
+				d.setCustomNameVisible(false);
+			}
 			parts.add(d);
 			add(level, manager, d);
 		}
@@ -908,13 +913,35 @@ public class Ship {
 		}
 	}
 
+	public static final String ANCHOR_PREFIX = "tidesofwar:ship/";
+
+	/** The first model part, whose position and heading are the ship's. Null before the ship is spawned. */
+	public Entity anchor() {
+		return parts.isEmpty() ? null : parts.get(0);
+	}
+
+	/** The ship type an anchor part stands for, or null for any other entity. */
+	public static ShipType anchorType(Entity e) {
+		Component n = e == null ? null : e.getCustomName();
+		if (n == null) return null;
+		String s = n.getString();
+		if (!s.startsWith(ANCHOR_PREFIX)) return null;
+		try {
+			return ShipType.valueOf(s.substring(ANCHOR_PREFIX.length()).toUpperCase(java.util.Locale.ROOT));
+		} catch (IllegalArgumentException ex) {
+			return null;
+		}
+	}
+
 	/** Seats a player. Seat 0 is the captain's. Returns false if that seat is taken. */
 	public boolean seat(ServerPlayer player, int seatIndex) {
 		if (seatIndex < 0 || seatIndex >= seats.size()) return false;
 		Display.ItemDisplay s = seats.get(seatIndex);
 		if (!s.getPassengers().isEmpty()) return false;
 		if (player.isPassenger()) player.stopRiding();
-		return player.startRiding(s, true, true);
+		boolean ok = player.startRiding(s, true, true);
+		if (ok) ClientMods.askIfMissing(player);
+		return ok;
 	}
 
 	public int firstFreePassengerSeat() {

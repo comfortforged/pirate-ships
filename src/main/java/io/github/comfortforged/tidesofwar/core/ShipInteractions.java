@@ -60,6 +60,7 @@ public final class ShipInteractions {
 
 	/** Get players off ship seats before they log out, so the seat isn't saved with them. */
 	public static void onDisconnect(ServerPlayer p) {
+		if (p != null) ClientMods.forget(p.getUUID());
 		if (p != null && p.getVehicle() != null && Ship.isPart(p.getVehicle())) {
 			p.stopRiding();
 		}

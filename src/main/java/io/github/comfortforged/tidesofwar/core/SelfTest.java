@@ -612,6 +612,14 @@ final class SelfTest {
 	private static void solidStep(MinecraftServer server, ServerLevel level, ShipManager m, int t) {
 		if (t == 10) {
 			check(sd.isSolid(), "a floating ship is solid");
+			check(Ship.anchorType(sd.anchor()) == ShipType.SLOOP, "the first model part names the ship type for the client mod");
+			check(Ship.anchorType(sd.cargoButton) == null && Ship.anchorType(null) == null, "other entities are not ship anchors");
+			UUID who = UUID.randomUUID();
+			check(!ClientMods.has(who), "a player is assumed to have no client mod");
+			ClientMods.mark(who, "0.4.0");
+			check(ClientMods.has(who) && "0.4.0".equals(ClientMods.version(who)), "the hello command records the client mod version");
+			ClientMods.forget(who);
+			check(!ClientMods.has(who), "leaving forgets the client mod");
 			var at = sd.pose();
 			net.minecraft.world.phys.Vec3 top = ShipFrame.toWorld(at, 1.0, 4.0, 1.5);
 			var item = makeItem(level, top);

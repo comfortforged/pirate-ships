@@ -112,6 +112,13 @@ public final class ShipCommands {
 							}
 							return m.ships().size();
 						}))
+				.then(Commands.literal("hello")
+						.then(Commands.argument("version", com.mojang.brigadier.arguments.StringArgumentType.word())
+								.executes(c -> {
+									ServerPlayer p = c.getSource().getPlayerOrException();
+									ClientMods.mark(p.getUUID(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "version"));
+									return 1;
+								})))
 				.then(Commands.literal("hull")
 						.executes(c -> {
 							ServerPlayer p = c.getSource().getPlayerOrException();
