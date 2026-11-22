@@ -78,6 +78,10 @@ public class Ship {
 	public float testPitch;
 	/** Coming down to land (water or ground). Not saved: a ship that reloads in the air just carries on flying. */
 	boolean landing;
+	/** Sinking out of the sky: falling until it hits water or ground. */
+	boolean falling;
+	private double fallSpeed;
+	private int flightTicks;
 	private boolean lastSprint;
 
 	/** Ticks left of the rising animation after a wreck was raised (not saved). */
@@ -185,8 +189,36 @@ public class Ship {
 		stateTicks = 0;
 		speed = 0;
 		queue.clear();
+		boolean air = flying;
+		if (air) {
+			// Riders drift down gently instead of dying with the ship.
+			for (Display.ItemDisplay seat : seats) {
+				for (Entity e : seat.getPassengers()) {
+					if (e instanceof net.minecraft.world.entity.LivingEntity le) {
+						le.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 300, 0));
+					}
+				}
+			}
+		}
 		for (Display.ItemDisplay seat : seats) seat.ejectPassengers();
 		waterY = y;
+		level.playSound(null, x, y, z, net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE, net.minecraft.sounds.SoundSource.BLOCKS, 1.5f, 0.5f);
+		if (air) {
+			falling = true;
+			fallSpeed = 0;
+			wreckY = y;
+		} else if (onGround) {
+			onGround = false;
+			wreckY = y;
+		} else {
+			wreckY = computeWreckY(level);
+		}
+		ShipManager m = ShipManager.get();
+		if (m != null) m.markDirty();
+	}
+
+	/** Where the wreck comes to rest: the seabed under the ship, at most as high as the waterline. */
+	private double computeWreckY(ServerLevel level) {
 		double best = Double.NEGATIVE_INFINITY;
 		int topY = (int) Math.floor(y);
 		for (float[] p : model().footprint) {
@@ -200,15 +232,23 @@ public class Ship {
 				}
 			}
 		}
-		wreckY = best == Double.NEGATIVE_INFINITY ? waterY - 6 : Math.min(waterY, best + 1.0);
-		level.playSound(null, x, y, z, net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE, net.minecraft.sounds.SoundSource.BLOCKS, 1.5f, 0.5f);
-		ShipManager m = ShipManager.get();
-		if (m != null) m.markDirty();
+		return best == Double.NEGATIVE_INFINITY ? waterY - 6 : Math.min(waterY, best + 1.0);
 	}
 
 	/** True if open water above the wreck lets it rise again. */
 	public boolean canRaise(ServerLevel level) {
-		return fits(level, x, waterY, z, yaw);
+		if (fits(level, x, waterY, z, yaw)) return true;
+		// A wreck lying on dry land can only be lifted by a ship with a Flight Core.
+		return upgrades.flight && clearAt(level, x, y, z, yaw);
+	}
+
+	/** Like {@link #refloat(double)}, but a wreck on dry land comes up beached. */
+	public void refloat(ServerLevel level, double hullFraction) {
+		boolean dry = !fits(level, x, waterY, z, yaw);
+		refloat(hullFraction);
+		onGround = dry;
+		flying = false;
+		landing = false;
 	}
 
 	/** Starts the rise to the surface. The caller has already checked the water and taken any payment. */
@@ -412,6 +452,7 @@ public class Ship {
 			speed = 0;
 			moved = false;
 		} else if (flying) {
+			burnFuel(captain);
 			moved = moveFlying(level, captain, in, max);
 		} else {
 			moved = moveSailing(level, captain, in, max);
@@ -499,13 +540,48 @@ public class Ship {
 		Config.Flight f = Config.current.flight;
 		if (!f.enabled) return "Flying is turned off on this server.";
 		if (!f.allowedDimensions.contains(dimension)) return "Ships can't fly in this dimension.";
+		if (!f.fuel.isEmpty() && fuelAvailable() == null) return "No fuel in the cargo hold (" + fuelText() + ").";
 		flying = true;
+		flightTicks = 0;
 		onGround = false;
 		landing = false;
 		speed = 0;
 		ShipManager m = ShipManager.get();
 		if (m != null) m.markDirty();
 		return null;
+	}
+
+	private Config.Cost fuelAvailable() {
+		for (Config.Cost c : Config.current.flight.fuel) {
+			if (ItemMatch.count(cargo, c.item) >= Math.max(1, c.count)) return c;
+		}
+		return null;
+	}
+
+	private String fuelText() {
+		StringBuilder sb = new StringBuilder();
+		for (Config.Cost c : Config.current.flight.fuel) {
+			if (sb.length() > 0) sb.append(" or ");
+			sb.append(c.count).append(" ").append(c.item.substring(c.item.indexOf(':') + 1).replace('_', ' '));
+		}
+		return sb.toString();
+	}
+
+	/** Burns one lot of fuel from the cargo every fuelSeconds; with none left the ship glides down. */
+	private void burnFuel(ServerPlayer captain) {
+		Config.Flight f = Config.current.flight;
+		if (f.fuel.isEmpty() || landing) return;
+		int every = Math.max(20, (int) (f.fuelSeconds * 20));
+		if (flightTicks++ % every != 0) return;
+		Config.Cost c = fuelAvailable();
+		if (c == null) {
+			landing = true;
+			if (captain != null) {
+				captain.sendOverlayMessage(Component.literal("Out of fuel! Gliding down...").withStyle(ChatFormatting.RED));
+			}
+		} else {
+			ItemMatch.take(cargo, c.item, Math.max(1, c.count));
+		}
 	}
 
 	/** If flight was switched off in the config (or the dimension removed) while airborne, come down. */
@@ -617,7 +693,49 @@ public class Ship {
 		return moved;
 	}
 
+	private void tickFalling(ServerLevel level) {
+		fallSpeed = Math.min(1.5, fallSpeed + 0.04);
+		int steps = Math.max(1, (int) Math.ceil(fallSpeed / 0.4));
+		double dy = fallSpeed / steps;
+		for (int i = 0; i < steps && falling; i++) {
+			double ny = y - dy;
+			if (fits(level, x, ny, z, yaw)) {
+				// hit the water: carry on as a normal sinking
+				y = ny;
+				waterY = y;
+				wreckY = computeWreckY(level);
+				falling = false;
+				flying = false;
+				landing = false;
+				stateTicks = 0;
+				level.playSound(null, x, y, z, net.minecraft.sounds.SoundEvents.GENERIC_SPLASH, net.minecraft.sounds.SoundSource.BLOCKS, 2.0f, 0.6f);
+			} else if (!clearAt(level, x, ny, z, yaw)) {
+				// hit the ground: a wreck where it lies
+				falling = false;
+				flying = false;
+				landing = false;
+				waterY = wreckY = y;
+				roll = SINK_ROLL;
+				state = State.WRECK;
+				wreckedAtGameTime = level.getGameTime();
+				level.playSound(null, x, y, z, net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE, net.minecraft.sounds.SoundSource.BLOCKS, 2.0f, 0.5f);
+			} else {
+				y = ny;
+			}
+		}
+		if (falling && age % 2 == 0) {
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 1.0, z, 4, type.halfBeam * 0.5, 0.3, type.length * 0.25, 0.02);
+		}
+		if (spawned) updateEntities(true);
+		ShipManager m = ShipManager.get();
+		if (m != null) m.markDirty();
+	}
+
 	private void tickSinking(ServerLevel level) {
+		if (falling) {
+			tickFalling(level);
+			return;
+		}
 		stateTicks++;
 		double progress = Math.min(1.0, stateTicks / (double) SINK_TICKS);
 		y = waterY + (wreckY - waterY) * progress;
@@ -631,6 +749,8 @@ public class Ship {
 		if (spawned) updateEntities(true);
 		if (stateTicks >= SINK_TICKS) {
 			state = State.WRECK;
+			flying = false;
+			landing = false;
 			wreckedAtGameTime = level.getGameTime();
 			y = wreckY;
 			roll = SINK_ROLL;

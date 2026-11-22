@@ -44,7 +44,7 @@ public final class Wrecks {
 	public static boolean raise(ServerLevel level, Ship ship, Container payer, ServerPlayer messageTo) {
 		if (ship.state != Ship.State.WRECK) return false;
 		if (!ship.canRaise(level)) {
-			tell(messageTo, "Not enough open water above the wreck to raise it.", ChatFormatting.RED);
+			tell(messageTo, "Not enough open water above the wreck to raise it (a wreck on land needs a Flight Core).", ChatFormatting.RED);
 			return false;
 		}
 		if (!canAfford(payer, ship)) {
@@ -52,7 +52,7 @@ public final class Wrecks {
 			return false;
 		}
 		for (Config.Cost c : cost(ship)) ItemMatch.take(payer, c.item, c.count);
-		ship.refloat(Config.current.wrecks.raiseHullPercent / 100.0);
+		ship.refloat(level, Config.current.wrecks.raiseHullPercent / 100.0);
 		tell(messageTo, "The " + ship.type.displayName + " rises from the deep!", ChatFormatting.GOLD);
 		return true;
 	}
@@ -61,7 +61,7 @@ public final class Wrecks {
 	public static boolean repairFully(ServerLevel level, Ship ship) {
 		if (ship.state == Ship.State.WRECK) {
 			if (!ship.canRaise(level)) return false;
-			ship.refloat(1.0);
+			ship.refloat(level, 1.0);
 		}
 		ship.hull = ship.maxHull();
 		ShipManager m = ShipManager.get();

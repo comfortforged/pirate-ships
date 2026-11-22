@@ -480,7 +480,7 @@ final class SelfTest {
 	// ------------------------------------------------------------------ flight
 
 	private static int flBase;
-	private static Ship fl;
+	private static Ship fl, fl2, fl3;
 	private static double flY0, flZ0;
 
 	private static void startFlightTests(ServerLevel level, ShipManager m) {
@@ -524,6 +524,57 @@ final class SelfTest {
 			check(!fl.flying && !fl.onGround, "the ship came down onto the water and sails again");
 			check(Math.abs(fl.y - (Y + 1 - Ship.DRAFT)) < 0.1, "landed at the waterline (" + String.format("%.2f", fl.y) + ")");
 			m.packUp(fl);
+			ships.clear();
+			// stone slab above the pool to land on
+			for (int sx = -41; sx <= -20; sx++) for (int sz = 0; sz <= 20; sz++) level.setBlock(new net.minecraft.core.BlockPos(sx, (int) Y + 6, sz), Blocks.STONE.defaultBlockState(), 3);
+			fl2 = new Ship(UUID.randomUUID(), ShipType.SLOOP, ShipManager.dimensionId(level), -30.5, Y + 10, 10.5, 0f, UUID.randomUUID(), "lander");
+			fl2.upgrades.flight = true;
+			fl2.flying = true;
+			fl2.landing = true;
+			fl2.testInput = new Input(false, false, false, false, false, false, false);
+			m.addShip(fl2);
+			ships.add(fl2);
+		}
+		if (t == 330) {
+			check(fl2.onGround && !fl2.flying, "landing on a block beaches the ship");
+			check(fl2.y > Y + 6.5 && fl2.y < Y + 9, "beached on top of the slab (" + String.format("%.2f", fl2.y) + ")");
+			flZ0 = fl2.z;
+			fl2.testInput = new Input(true, false, false, false, false, false, false);
+		}
+		if (t == 345) {
+			check(Math.abs(fl2.z - flZ0) < 0.01, "a beached ship doesn't sail");
+			fl2.testInput = new Input(false, false, false, false, false, false, false);
+			check(fl2.toggleFlight(level) == null && fl2.flying && !fl2.onGround, "a beached Flight Core ship takes off again");
+		}
+		if (t == 350) {
+			fl2.damage(level, 100000);
+			check(fl2.state == Ship.State.SINKING && fl2.falling, "zero hull in the air starts a fall");
+		}
+		if (t == 420) {
+			check(fl2.state == Ship.State.WRECK && fl2.y > Y + 6.0, "a ship that falls onto land becomes a wreck there (" + String.format("%.2f", fl2.y) + ")");
+			check(fl2.canRaise(level), "a Flight Core wreck on land can be raised");
+			check(Wrecks.repairFully(level, fl2) && fl2.state == Ship.State.AFLOAT && fl2.onGround, "the raised land wreck is beached");
+		}
+		if (t == 430) {
+			for (int sx = -41; sx <= -20; sx++) for (int sz = 0; sz <= 20; sz++) level.setBlock(new net.minecraft.core.BlockPos(sx, (int) Y + 6, sz), Blocks.AIR.defaultBlockState(), 3);
+			m.packUp(fl2);
+			ships.clear();
+			fl3 = new Ship(UUID.randomUUID(), ShipType.SLOOP, ShipManager.dimensionId(level), -30.5, Y + 14, 10.5, 0f, UUID.randomUUID(), "faller");
+			fl3.upgrades.flight = true;
+			fl3.flying = true;
+			fl3.testInput = new Input(false, false, false, false, false, false, false);
+			m.addShip(fl3);
+			ships.add(fl3);
+		}
+		if (t == 435) {
+			fl3.damage(level, 100000);
+		}
+		if (t == 700) {
+			check(fl3.state == Ship.State.WRECK && !fl3.flying && fl3.y < Y, "a ship shot down over water ends as a wreck on the bed (" + String.format("%.2f", fl3.y) + ")");
+			Config.current.flight.fuel.add(new Config.Cost("minecraft:coal", 1));
+			Ship fuelShip = new Ship(UUID.randomUUID(), ShipType.SLOOP, ShipManager.dimensionId(level), 0, 0, 0, 0f, null, "f");
+			fuelShip.upgrades.flight = true;
+			check(fuelShip.toggleFlight(level) != null && !fuelShip.flying, "no fuel, no take-off when fuel is configured");
 			ships.clear();
 			finish(server);
 		}
