@@ -164,6 +164,22 @@ public final class ShipCommands {
 							c.getSource().sendSuccess(() -> Component.literal("Repaired the nearest ship."), true);
 							return 1;
 						}))
+				.then(Commands.literal("fly")
+						.executes(c -> {
+							ServerPlayer p = c.getSource().getPlayerOrException();
+							Ship s = nearestOwned(p);
+							if (s == null) {
+								c.getSource().sendFailure(Component.literal("You don't have a ship nearby."));
+								return 0;
+							}
+							String err = s.toggleFlight((net.minecraft.server.level.ServerLevel) p.level());
+							if (err != null) {
+								c.getSource().sendFailure(Component.literal(err));
+								return 0;
+							}
+							c.getSource().sendSuccess(() -> Component.literal(s.landing ? "Landing..." : "Taking off!"), false);
+							return 1;
+						}))
 				.then(Commands.literal("recall")
 						.executes(c -> {
 							ServerPlayer p = c.getSource().getPlayerOrException();

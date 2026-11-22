@@ -74,6 +74,12 @@ public class Ship {
 	/** Space was held last tick: captain, port gunner, starboard gunner. */
 	private final boolean[] lastJump = new boolean[3];
 
+	/** Fake look pitch for the self-test (used when testInput is set). */
+	public float testPitch;
+	/** Coming down to land (water or ground). Not saved: a ship that reloads in the air just carries on flying. */
+	boolean landing;
+	private boolean lastSprint;
+
 	/** Ticks left of the rising animation after a wreck was raised (not saved). */
 	int rising;
 	private float appliedRoll = Float.NaN;
@@ -391,6 +397,66 @@ public class Ship {
 			if (Math.abs(speed) < 0.002) speed = 0;
 		}
 
+		boolean sprint = in.sprint();
+		if (sprint && !lastSprint && captain != null || sprint && !lastSprint && testInput != null) {
+			String error = toggleFlight(level);
+			if (error != null && captain != null) {
+				captain.sendOverlayMessage(Component.literal(error).withStyle(ChatFormatting.RED));
+			}
+		}
+		lastSprint = sprint;
+		checkFlightAllowed();
+
+		boolean moved;
+		if (onGround) {
+			speed = 0;
+			moved = false;
+		} else if (flying) {
+			moved = moveFlying(level, captain, in, max);
+		} else {
+			moved = moveSailing(level, captain, in, max);
+		}
+
+		if (spawned) updateEntities(moved);
+
+		if (captain != null && age % 10 == 0) {
+			double bps = speed * 20.0;
+			String fire = Config.current.cannons.captainCanFire ? ", Space fires" : "";
+			String fly = upgrades.flight ? ", Ctrl " + (flying ? "lands" : "takes off") : "";
+			String head;
+			if (onGround) {
+				head = "Beached on land";
+			} else if (flying) {
+				head = String.format("✈ %s  |  %s  |  Altitude %.0f", type.displayName, landing ? "Landing" : "Flying",
+						groundDistance(level, 99));
+			} else {
+				head = "⚓ " + type.displayName;
+			}
+			captain.sendOverlayMessage(Component.literal(String.format("%s  |  Speed %.1f blocks/s  |  Hull %d%%  |  W/S sails, A/D steer%s%s, Shift to leave",
+					head, bps, hullPercent(), fire, fly)).withStyle(ChatFormatting.GOLD));
+		}
+		if (flying && age % 10 == 0) {
+			level.sendParticles(ParticleTypes.END_ROD, x, y - 1.0, z, 2, type.halfBeam * 0.4, 0.1, type.length * 0.15, 0.01);
+		}
+		if (age % 10 == 0 && hullPercent() < 50) {
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 2.0, z, 3, 0.5, 0.3, 0.5, 0.01);
+			if (hullPercent() < 25) level.sendParticles(ParticleTypes.FLAME, x, y + 1.5, z, 2, 0.6, 0.2, 0.6, 0.01);
+		}
+		if (age % 10 == 0) {
+			long now = level.getGameTime();
+			for (int side : new int[]{ShipModel.PORT, ShipModel.STARBOARD}) {
+				ServerPlayer g = gunner(side);
+				if (g == null) continue;
+				long wait = reloadTicksLeft(now, side);
+				String status = wait > 0 ? String.format("Reloading %.1fs", wait / 20.0) : "READY";
+				String ammo = Config.current.cannons.requireAmmo ? String.valueOf(Cannons.ammoShots(this)) : "∞";
+				g.sendOverlayMessage(Component.literal(String.format("%s guns: %s  |  Hull %d%%  |  Broadsides left %s  |  Space fires",
+						Cannons.sideName(side), status, hullPercent(), ammo)).withStyle(ChatFormatting.GOLD));
+			}
+		}
+	}
+
+	private boolean moveSailing(ServerLevel level, ServerPlayer captain, Input in, float max) {
 		boolean moved = false;
 		int turn = (in.right() ? 1 : 0) - (in.left() ? 1 : 0);
 		if (turn != 0) {
@@ -417,31 +483,138 @@ public class Ship {
 				}
 			}
 		}
+		return moved;
+	}
 
-		if (spawned) updateEntities(moved);
+	// ------------------------------------------------------------------ flight
 
-		if (captain != null && age % 10 == 0) {
-			double bps = speed * 20.0;
-			String fire = Config.current.cannons.captainCanFire ? ", Space fires" : "";
-			captain.sendOverlayMessage(Component.literal(String.format("⚓ %s  |  Speed %.1f blocks/s  |  Hull %d%%  |  W/S sails, A/D steer%s, Shift to leave",
-					type.displayName, bps, hullPercent(), fire)).withStyle(ChatFormatting.GOLD));
+	/** Takes off, or starts landing. Returns null on success, otherwise why not. */
+	public String toggleFlight(ServerLevel level) {
+		if (state != State.AFLOAT || rising > 0) return "Not now.";
+		if (flying) {
+			landing = !landing;
+			return null;
 		}
-		if (age % 10 == 0 && hullPercent() < 50) {
-			level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 2.0, z, 3, 0.5, 0.3, 0.5, 0.01);
-			if (hullPercent() < 25) level.sendParticles(ParticleTypes.FLAME, x, y + 1.5, z, 2, 0.6, 0.2, 0.6, 0.01);
-		}
-		if (age % 10 == 0) {
-			long now = level.getGameTime();
-			for (int side : new int[]{ShipModel.PORT, ShipModel.STARBOARD}) {
-				ServerPlayer g = gunner(side);
-				if (g == null) continue;
-				long wait = reloadTicksLeft(now, side);
-				String status = wait > 0 ? String.format("Reloading %.1fs", wait / 20.0) : "READY";
-				String ammo = Config.current.cannons.requireAmmo ? String.valueOf(Cannons.ammoShots(this)) : "∞";
-				g.sendOverlayMessage(Component.literal(String.format("%s guns: %s  |  Hull %d%%  |  Broadsides left %s  |  Space fires",
-						Cannons.sideName(side), status, hullPercent(), ammo)).withStyle(ChatFormatting.GOLD));
+		if (!upgrades.flight) return "This ship has no Flight Core.";
+		Config.Flight f = Config.current.flight;
+		if (!f.enabled) return "Flying is turned off on this server.";
+		if (!f.allowedDimensions.contains(dimension)) return "Ships can't fly in this dimension.";
+		flying = true;
+		onGround = false;
+		landing = false;
+		speed = 0;
+		ShipManager m = ShipManager.get();
+		if (m != null) m.markDirty();
+		return null;
+	}
+
+	/** If flight was switched off in the config (or the dimension removed) while airborne, come down. */
+	private void checkFlightAllowed() {
+		if (!flying || landing) return;
+		Config.Flight f = Config.current.flight;
+		if (!f.enabled || !f.allowedDimensions.contains(dimension)) landing = true;
+	}
+
+	/** True if the hull, deck and masts at this position and heading touch no solid block. */
+	public boolean clearAt(ServerLevel level, double px, double py, double pz, float pyaw) {
+		float[] heights = {-0.8f, 0.2f, 1.2f, 2.4f};
+		for (float[] p : model().footprint) {
+			for (float h : heights) {
+				Vec3 w = toWorld(px, py, pz, pyaw, p[0], h, p[1]);
+				BlockPos bp = BlockPos.containing(w.x, w.y, w.z);
+				if (!level.getBlockState(bp).getCollisionShape(level, bp).isEmpty()) return false;
 			}
 		}
+		float stern = -type.length / 2f;
+		for (float[] mast : type.masts) {
+			Vec3 w = toWorld(px, py, pz, pyaw, 0, mast[1], stern + mast[0] * type.length);
+			BlockPos bp = BlockPos.containing(w.x, w.y, w.z);
+			if (!level.getBlockState(bp).getCollisionShape(level, bp).isEmpty()) return false;
+		}
+		return true;
+	}
+
+	/** Blocks of air between the keel and the first solid block or water below (capped). */
+	public double groundDistance(ServerLevel level, double cap) {
+		for (int d = 0; d <= (int) cap + 1; d++) {
+			BlockPos bp = BlockPos.containing(x, y - 0.8 - d, z);
+			if (!level.getBlockState(bp).getCollisionShape(level, bp).isEmpty() || !level.getFluidState(bp).isEmpty()) return d;
+		}
+		return cap + 2;
+	}
+
+	private boolean moveFlying(ServerLevel level, ServerPlayer captain, Input in, float max) {
+		Config.Flight f = Config.current.flight;
+		boolean moved = false;
+		float cap = max * (float) f.speedMultiplier;
+		// speed is clamped to the flying top speed
+		if (speed > cap) speed = cap;
+
+		int turn = (in.right() ? 1 : 0) - (in.left() ? 1 : 0);
+		if (turn != 0) {
+			double helm = 0.35 + 0.65 * Math.min(1.0, Math.abs(speed) / Math.max(0.01, max));
+			float newYaw = wrap(yaw + (float) (turn * ShipStats.turnRate(this) * helm));
+			if (clearAt(level, x, y, z, newYaw)) {
+				yaw = newYaw;
+				moved = true;
+			}
+		}
+		if (speed != 0) {
+			double r = Math.toRadians(yaw);
+			double dx = -Math.sin(r) * speed, dz = Math.cos(r) * speed;
+			if (clearAt(level, x + dx, y, z + dz, yaw)) {
+				x += dx;
+				z += dz;
+				moved = true;
+			} else if (clearAt(level, x + dx, y, z, yaw)) {
+				x += dx;
+				speed *= 0.9;
+				moved = true;
+			} else if (clearAt(level, x, y, z + dz, yaw)) {
+				z += dz;
+				speed *= 0.9;
+				moved = true;
+			} else {
+				speed = 0;
+				if (captain != null) {
+					captain.sendOverlayMessage(Component.literal("Something is in the way!").withStyle(ChatFormatting.YELLOW));
+				}
+			}
+		}
+
+		// Vertical: look up to climb, down to dive. Needs forward speed to climb quickly.
+		double vy = 0;
+		if (landing) {
+			vy = -Math.max(0.05, f.climbRate * 0.6);
+		} else if (captain != null || testInput != null) {
+			float pitch = testInput != null ? testPitch : captain.getXRot();
+			if (Math.abs(pitch) > 5f) {
+				double drive = 0.3 + 0.7 * Math.min(1.0, Math.abs(speed) / Math.max(0.01, max));
+				vy = -Math.sin(Math.toRadians(pitch)) * f.climbRate * drive;
+			}
+		}
+		if (vy > 0 && (y + vy > f.maxY || groundDistance(level, f.maxHeightAboveGround) >= f.maxHeightAboveGround)) vy = 0;
+		if (vy != 0) {
+			double ny = y + vy;
+			if (landing && fits(level, x, ny, z, yaw)) {
+				// touched the water: settle on the surface and sail again
+				y = Math.floor(ny) + 1 - DRAFT;
+				flying = false;
+				landing = false;
+				moved = true;
+			} else if (clearAt(level, x, ny, z, yaw)) {
+				y = ny;
+				moved = true;
+			} else if (landing) {
+				flying = false;
+				landing = false;
+				onGround = true;
+				speed = 0;
+			}
+			ShipManager m = ShipManager.get();
+			if (m != null) m.markDirty();
+		}
+		return moved;
 	}
 
 	private void tickSinking(ServerLevel level) {

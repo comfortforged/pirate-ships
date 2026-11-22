@@ -112,11 +112,26 @@ public final class Config {
 		}
 	}
 
+	public static final class Flight {
+		public boolean enabled = true;
+		/** Multiplies the top speed while flying. */
+		public double speedMultiplier = 1.0;
+		/** Most blocks per tick the ship climbs or dives. */
+		public double climbRate = 0.25;
+		public double maxHeightAboveGround = 48;
+		public double maxY = 300;
+		public List<String> allowedDimensions = new ArrayList<>(List.of("minecraft:overworld", "minecraft:the_end"));
+		/** Items burned from the cargo every fuelSeconds while airborne. Empty = flying is free. */
+		public List<Cost> fuel = new ArrayList<>();
+		public double fuelSeconds = 30;
+	}
+
 	public Cannons cannons = new Cannons();
 	public Damage damage = new Damage();
 	public Hull hull = new Hull();
 	public Wrecks wrecks = new Wrecks();
 	public UpgradeBonuses upgrades = new UpgradeBonuses();
+	public Flight flight = new Flight();
 
 	/** The active settings. Never null. */
 	public static volatile Config current = new Config();
@@ -151,6 +166,9 @@ public final class Config {
 		if (damage == null) damage = new Damage();
 		if (hull == null) hull = new Hull();
 		if (wrecks == null) wrecks = new Wrecks();
+		if (flight == null) flight = new Flight();
+		if (flight.allowedDimensions == null) flight.allowedDimensions = new Flight().allowedDimensions;
+		if (flight.fuel == null) flight.fuel = new ArrayList<>();
 		upgrades = upgrades == null ? new UpgradeBonuses() : upgrades.fixed();
 		if (cannons.ammo == null) cannons.ammo = new ArrayList<>();
 		if (wrecks.raiseCost == null) wrecks.raiseCost = new Wrecks().raiseCost;

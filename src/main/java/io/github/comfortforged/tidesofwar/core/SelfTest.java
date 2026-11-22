@@ -185,6 +185,7 @@ final class SelfTest {
 		if (tick > COMBAT_START) combatStep(server, level, m, tick - COMBAT_START);
 		if (sinkBase > 0 && tick > sinkBase) sinkStep(server, level, m, tick - sinkBase);
 		if (upBase > 0 && tick > upBase) upgradeStep(server, level, m, tick - upBase);
+		if (flBase > 0 && tick > flBase) flightStep(server, level, m, tick - flBase);
 	}
 
 	// ------------------------------------------------------------------ cannons and ship combat
@@ -472,7 +473,58 @@ final class SelfTest {
 			check(ShipItems.upgradesOf(item).summary().equals(upSummary), "packed upgraded ship keeps them");
 			check(ShipItems.hullOf(item, ShipType.SLOOP) <= ShipStats.maxHull(ShipType.SLOOP, ShipItems.upgradesOf(item)), "packed hull respects the upgraded maximum");
 			ships.clear();
-			ships.add(up);
+			startFlightTests(level, m);
+		}
+	}
+
+	// ------------------------------------------------------------------ flight
+
+	private static int flBase;
+	private static Ship fl;
+	private static double flY0, flZ0;
+
+	private static void startFlightTests(ServerLevel level, ShipManager m) {
+		flBase = tick;
+		fl = new Ship(UUID.randomUUID(), ShipType.SLOOP, ShipManager.dimensionId(level), -30.5, Y + 1 - Ship.DRAFT, 10.5, 0f,
+				UUID.randomUUID(), "flier");
+		m.addShip(fl);
+		ships.add(fl);
+		Config.current = new Config();
+		fl.testInput = new Input(false, false, false, false, false, false, false);
+	}
+
+	private static void flightStep(MinecraftServer server, ServerLevel level, ShipManager m, int t) {
+		if (t == 5) {
+			check(fl.toggleFlight(level) != null && !fl.flying, "a ship without a Flight Core can't take off");
+			fl.upgrades.flight = true;
+			Config.current.flight.enabled = false;
+			check(fl.toggleFlight(level) != null && !fl.flying, "flying can be disabled in the config");
+			Config.current.flight.enabled = true;
+			check(fl.toggleFlight(level) == null && fl.flying, "a Flight Core ship takes off");
+			flY0 = fl.y;
+			flZ0 = fl.z;
+			fl.testPitch = -40f;
+		}
+		if (t == 70) {
+			check(fl.y > flY0 + 1.5, "looking up climbs (" + String.format("%.2f -> %.2f", flY0, fl.y) + ")");
+			check(Math.abs(fl.z - flZ0) < 0.01, "climbing without throttle doesn't drift");
+			fl.testPitch = 0f;
+			fl.testInput = new Input(true, false, false, false, false, false, false);
+			flY0 = fl.y;
+		}
+		if (t == 100) {
+			check(fl.z - flZ0 > 1.0, "flying ahead moves the ship (" + String.format("%.2f", fl.z - flZ0) + ")");
+			check(Math.abs(fl.y - flY0) < 0.01, "level look keeps altitude");
+			fl.testInput = new Input(false, false, false, false, false, false, false);
+		}
+		if (t == 140) {
+			check(fl.toggleFlight(level) == null && fl.landing, "landing starts");
+		}
+		if (t == 260) {
+			check(!fl.flying && !fl.onGround, "the ship came down onto the water and sails again");
+			check(Math.abs(fl.y - (Y + 1 - Ship.DRAFT)) < 0.1, "landed at the waterline (" + String.format("%.2f", fl.y) + ")");
+			m.packUp(fl);
+			ships.clear();
 			finish(server);
 		}
 	}
