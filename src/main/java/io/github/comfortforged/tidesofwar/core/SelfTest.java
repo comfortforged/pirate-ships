@@ -570,7 +570,7 @@ final class SelfTest {
 			fl3.damage(level, 100000);
 		}
 		if (t == 700) {
-			check(fl3.state == Ship.State.WRECK && !fl3.flying && fl3.y < Y, "a ship shot down over water ends as a wreck on the bed (" + String.format("%.2f", fl3.y) + ")");
+			check(fl3.state == Ship.State.WRECK && !fl3.flying && fl3.y < fl3.waterY - 0.5, "a ship shot down over water ends as a wreck on the bed (" + String.format("%.2f of %.2f", fl3.y, fl3.waterY) + ")");
 			Config.current.flight.fuel.add(new Config.Cost("minecraft:coal", 1));
 			Ship fuelShip = new Ship(UUID.randomUUID(), ShipType.SLOOP, ShipManager.dimensionId(level), 0, 0, 0, 0f, null, "f");
 			fuelShip.upgrades.flight = true;
