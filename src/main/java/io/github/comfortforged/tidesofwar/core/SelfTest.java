@@ -175,6 +175,77 @@ final class SelfTest {
 			check(probe.inCombat(now + 20), "ship is in combat just after a hit");
 			check(!probe.inCombat(now + Config.current.hull.combatLockSeconds * 20L + 1), "combat lock expires");
 
+			startCombat(level, m);
+		}
+		if (tick > COMBAT_START) combatStep(server, level, m, tick - COMBAT_START);
+	}
+
+	// ------------------------------------------------------------------ cannons and ship combat
+
+	private static final int COMBAT_START = 1660;
+	private static Ship attacker, target;
+	private static double targetHullBefore;
+	private static int ammoBefore;
+
+	private static void startCombat(ServerLevel level, ShipManager m) {
+		ships.clear();
+		Config.current = new Config();
+		attacker = new Ship(UUID.randomUUID(), ShipType.BRIGANTINE, ShipManager.dimensionId(level), -10.5, Y + 1 - Ship.DRAFT, 10.5, 0f,
+				UUID.randomUUID(), "attacker");
+		target = new Ship(UUID.randomUUID(), ShipType.GALLEON, ShipManager.dimensionId(level), 10.5, Y + 1 - Ship.DRAFT, 10.5, 0f,
+				UUID.randomUUID(), "target");
+		check(attacker.fits(level, attacker.x, attacker.y, attacker.z, 0f) && target.fits(level, target.x, target.y, target.z, 0f),
+				"combat ships fit in the pool");
+		m.addShip(attacker);
+		m.addShip(target);
+		ships.add(attacker);
+		ships.add(target);
+	}
+
+	private static int gunpowder(Ship s) {
+		return ItemMatch.count(s.cargo, "minecraft:gunpowder");
+	}
+
+	private static void combatStep(MinecraftServer server, ServerLevel level, ShipManager m, int t) {
+		final float aim = -90f; // straight out to port, towards the target
+		if (t == 10) {
+			check(attacker.isSpawned() && target.isSpawned(), "combat ships spawned");
+			boolean fired = Cannons.tryFire(level, attacker, ShipModel.PORT, null, aim, 0f);
+			check(!fired && attacker.queue.isEmpty(), "no ammo: nothing fires");
+			attacker.cargo.setItem(0, new ItemStack(Items.GUNPOWDER, 64));
+			targetHullBefore = target.hull;
+			ammoBefore = gunpowder(attacker);
+			fired = Cannons.tryFire(level, attacker, ShipModel.PORT, null, aim, 0f);
+			check(fired, "broadside fires with ammo");
+			check(attacker.queue.size() == attacker.type.cannonsPerSide, "broadside queues " + attacker.type.cannonsPerSide + " cannons");
+			check(ammoBefore - gunpowder(attacker) == attacker.type.cannonsPerSide, "broadside used one gunpowder per cannon");
+			check(!Cannons.tryFire(level, attacker, ShipModel.PORT, null, aim, 0f), "second broadside is refused while reloading");
+			check(gunpowder(attacker) == ammoBefore - attacker.type.cannonsPerSide, "refused broadside used no ammo");
+		}
+		if (t == 90) {
+			check(target.hull < targetHullBefore, "broadside hurt the target ship (hull " + targetHullBefore + " -> " + target.hull + ")");
+			check(target.inCombat(level.getGameTime()), "hit ship is in combat");
+			check(attacker.hull == attacker.maxHull(), "firing ship took no damage");
+			check(m.ballCount() == 0, "no cannonballs left in flight");
+		}
+		if (t == 100) {
+			Config.current.damage.shipCombat = false;
+			attacker.setReload(ShipModel.PORT, 0);
+			targetHullBefore = target.hull;
+			check(Cannons.tryFire(level, attacker, ShipModel.PORT, null, aim, 0f), "second broadside fires after reload");
+		}
+		if (t == 180) {
+			check(target.hull == targetHullBefore, "shipCombat=false: no hull damage");
+			Config.current.damage.shipCombat = true;
+			Config.current.damage.friendlyFire = false;
+			target.owner = attacker.owner;
+			attacker.setReload(ShipModel.PORT, 0);
+			targetHullBefore = target.hull;
+			check(Cannons.tryFire(level, attacker, ShipModel.PORT, null, aim, 0f), "third broadside fires");
+		}
+		if (t == 260) {
+			check(target.hull == targetHullBefore, "same owner, friendlyFire=false: no hull damage");
+			Config.current = new Config();
 			if (failures.isEmpty()) {
 				TidesOfWar.LOGGER.info("TIDESOFWAR SELFTEST PASS");
 			} else {

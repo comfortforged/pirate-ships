@@ -61,6 +61,13 @@ public class Ship {
 	public double wreckY;
 	public double waterY;
 
+	/** Cannons waiting to fire (a broadside goes off one gun after another). */
+	final List<Cannons.Queued> queue = new ArrayList<>();
+	/** Game time at which each side (0 = port, 1 = starboard) has finished reloading. */
+	private final long[] reloadUntil = new long[2];
+	/** Space was held last tick: captain, port gunner, starboard gunner. */
+	private final boolean[] lastJump = new boolean[3];
+
 	/** Used only by the automated self-test to drive the ship without a player. */
 	public Input testInput;
 
@@ -99,6 +106,50 @@ public class Ship {
 	/** True shortly after the ship took damage; such a ship can't be packed up, recalled or repaired. */
 	public boolean inCombat(long gameTime) {
 		return gameTime - lastDamagedAt < Config.current.hull.combatLockSeconds * 20L;
+	}
+
+	private static int sideIndex(int side) {
+		return side == ShipModel.PORT ? 0 : 1;
+	}
+
+	public long reloadTicksLeft(long now, int side) {
+		return Math.max(0, reloadUntil[sideIndex(side)] - now);
+	}
+
+	void setReload(int side, long until) {
+		reloadUntil[sideIndex(side)] = until;
+	}
+
+	/** Takes hull damage from a hit. Does nothing unless the ship is afloat. */
+	public void damage(double amount, long gameTime) {
+		if (state != State.AFLOAT) return;
+		hull = Math.max(0, hull - amount);
+		lastDamagedAt = gameTime;
+		ShipManager m = ShipManager.get();
+		if (m != null) m.markDirty();
+	}
+
+	/**
+	 * Where along the segment p0..p1 (0..1) the hull is first hit, or -1 for a miss.
+	 * The hull is treated as a box around the ship, a little larger than the model.
+	 */
+	public double hitFraction(Vec3 p0, Vec3 p1) {
+		double len = p0.distanceTo(p1);
+		int steps = Math.max(1, (int) Math.ceil(len / 0.4));
+		double r = Math.toRadians(yaw);
+		double cos = Math.cos(r), sin = Math.sin(r);
+		double halfLen = type.length / 2.0 + 0.3, halfBeam = type.halfBeam + 0.3;
+		for (int i = 0; i <= steps; i++) {
+			double t = (double) i / steps;
+			double px = p0.x + (p1.x - p0.x) * t;
+			double py = p0.y + (p1.y - p0.y) * t;
+			double pz = p0.z + (p1.z - p0.z) * t;
+			double dx = px - x, dz = pz - z;
+			double lx = dx * cos + dz * sin;
+			double lz = -dx * sin + dz * cos;
+			if (Math.abs(lx) <= halfBeam && Math.abs(lz) <= halfLen && py >= y - 0.9 && py <= y + 1.8) return t;
+		}
+		return -1;
 	}
 
 	public ShipModel model() {
@@ -230,6 +281,7 @@ public class Ship {
 		age++;
 		ServerPlayer captain = captain();
 		Input in = testInput != null ? testInput : (captain != null ? captain.getLastClientInput() : Input.EMPTY);
+		tickGuns(level, captain, in);
 
 		float max = type.maxSpeed;
 		if (in.forward() && !in.backward()) {
@@ -272,8 +324,65 @@ public class Ship {
 
 		if (captain != null && age % 10 == 0) {
 			double bps = speed * 20.0;
-			captain.sendOverlayMessage(Component.literal(String.format("⚓ %s  |  Speed %.1f blocks/s  |  W/S sails, A/D steer, Shift to leave",
-					type.displayName, bps)).withStyle(ChatFormatting.GOLD));
+			String fire = Config.current.cannons.captainCanFire ? ", Space fires" : "";
+			captain.sendOverlayMessage(Component.literal(String.format("⚓ %s  |  Speed %.1f blocks/s  |  Hull %d%%  |  W/S sails, A/D steer%s, Shift to leave",
+					type.displayName, bps, hullPercent(), fire)).withStyle(ChatFormatting.GOLD));
+		}
+		if (age % 10 == 0) {
+			long now = level.getGameTime();
+			for (int side : new int[]{ShipModel.PORT, ShipModel.STARBOARD}) {
+				ServerPlayer g = gunner(side);
+				if (g == null) continue;
+				long wait = reloadTicksLeft(now, side);
+				String status = wait > 0 ? String.format("Reloading %.1fs", wait / 20.0) : "READY";
+				String ammo = Config.current.cannons.requireAmmo ? String.valueOf(Cannons.ammoShots(this)) : "∞";
+				g.sendOverlayMessage(Component.literal(String.format("%s guns: %s  |  Hull %d%%  |  Broadsides left %s  |  Space fires",
+						Cannons.sideName(side), status, hullPercent(), ammo)).withStyle(ChatFormatting.GOLD));
+			}
+		}
+	}
+
+	private ServerPlayer gunner(int side) {
+		int idx = model().gunnerSeat(side);
+		if (idx < 0 || idx >= seats.size()) return null;
+		List<Entity> p = seats.get(idx).getPassengers();
+		return !p.isEmpty() && p.get(0) instanceof ServerPlayer sp ? sp : null;
+	}
+
+	/** Fires on a Space press (not while held) and lets queued cannons go off. */
+	private void tickGuns(ServerLevel level, ServerPlayer captain, Input captainInput) {
+		if (!queue.isEmpty()) {
+			for (int i = queue.size() - 1; i >= 0; i--) {
+				Cannons.Queued q = queue.get(i);
+				if (q.delay() <= 0) {
+					queue.remove(i);
+					if (state == State.AFLOAT) Cannons.launch(level, this, q);
+				} else {
+					queue.set(i, q.tick());
+				}
+			}
+		}
+		if (seats.isEmpty() || state != State.AFLOAT) return;
+		ServerPlayer port = gunner(ShipModel.PORT), star = gunner(ShipModel.STARBOARD);
+		ServerPlayer[] who = {captain, port, star};
+		for (int i = 0; i < 3; i++) {
+			ServerPlayer p = who[i];
+			boolean jump = p != null && (i == 0 ? captainInput.jump() : p.getLastClientInput().jump());
+			boolean pressed = jump && !lastJump[i];
+			lastJump[i] = jump;
+			if (!pressed) continue;
+			if (i == 0) {
+				if (!Config.current.cannons.captainCanFire) continue;
+				int side = wrap(p.getYRot() - yaw) < 0 ? ShipModel.PORT : ShipModel.STARBOARD;
+				if (gunner(side) != null) {
+					p.sendOverlayMessage(Component.literal("A gunner is manning the " + Cannons.sideName(side).toLowerCase() + " guns.")
+							.withStyle(ChatFormatting.YELLOW));
+					continue;
+				}
+				Cannons.tryFire(level, this, side, p, p.getYRot(), p.getXRot());
+			} else {
+				Cannons.tryFire(level, this, i == 1 ? ShipModel.PORT : ShipModel.STARBOARD, p, p.getYRot(), p.getXRot());
+			}
 		}
 	}
 

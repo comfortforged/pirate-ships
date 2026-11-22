@@ -49,6 +49,8 @@ public final class ShipManager {
 	/** Live part entity UUID -> ship. Anything tagged as a part but not in here is a stale leftover. */
 	private final Map<UUID, Ship> partOwners = new HashMap<>();
 	private final Set<Entity> staleParts = new HashSet<>();
+	private final List<Cannonball> balls = new ArrayList<>();
+	private static final int MAX_BALLS = 200;
 	private boolean dirty;
 	private int ticksSinceSave;
 
@@ -67,6 +69,8 @@ public final class ShipManager {
 
 	public static void stop() {
 		if (instance == null) return;
+		for (Cannonball b : new ArrayList<>(instance.balls)) b.remove(instance);
+		instance.balls.clear();
 		for (Ship s : instance.ships.values()) s.despawn(instance);
 		instance.save();
 		instance = null;
@@ -123,12 +127,26 @@ public final class ShipManager {
 				ship.despawn(this);
 			}
 		}
+		for (Cannonball b : new ArrayList<>(balls)) {
+			if (b.level == level && !b.dead) b.tick(this);
+		}
+		balls.removeIf(b -> b.dead);
 		if (level == server.overworld()) {
 			ticksSinceSave++;
 			if (dirty && ticksSinceSave > 20 * 60) {
 				save();
 			}
 		}
+	}
+
+	int ballCount() {
+		return balls.size();
+	}
+
+	/** Adds a cannonball in flight, dropping the oldest if there are too many. */
+	void addBall(Cannonball b) {
+		balls.add(b);
+		while (balls.size() > MAX_BALLS) balls.remove(0).remove(this);
 	}
 
 	public static String dimensionId(ServerLevel level) {
