@@ -53,10 +53,37 @@ public final class ShipCommands {
 								return 0;
 							}
 							for (Ship s : m.ships()) {
-								c.getSource().sendSuccess(() -> Component.literal(String.format("%s owned by %s at %d %d %d (%s)",
-										s.type.displayName, s.ownerName, (int) s.x, (int) s.y, (int) s.z, s.dimension)), false);
+								c.getSource().sendSuccess(() -> Component.literal(String.format("%s owned by %s at %d %d %d (%s), hull %d%%, %s",
+										s.type.displayName, s.ownerName, (int) s.x, (int) s.y, (int) s.z, s.dimension,
+										s.hullPercent(), s.state.name().toLowerCase())), false);
 							}
 							return m.ships().size();
+						}))
+				.then(Commands.literal("hull")
+						.executes(c -> {
+							ServerPlayer p = c.getSource().getPlayerOrException();
+							ShipManager m = ShipManager.get();
+							Ship found = null;
+							if (p.getVehicle() != null) found = m.shipOfPart(p.getVehicle());
+							double bestDist = Double.MAX_VALUE;
+							if (found == null) {
+								for (Ship s : m.ships()) {
+									if (!p.getUUID().equals(s.owner) || !s.dimension.equals(ShipManager.dimensionId(p.level()))) continue;
+									double d = p.distanceToSqr(s.x, s.y, s.z);
+									if (d < bestDist) {
+										bestDist = d;
+										found = s;
+									}
+								}
+							}
+							if (found == null) {
+								c.getSource().sendFailure(Component.literal("You aren't on a ship and have none nearby."));
+								return 0;
+							}
+							Ship s = found;
+							c.getSource().sendSuccess(() -> Component.literal(String.format("%s: hull %d%% (%d/%d), %s",
+									s.type.displayName, s.hullPercent(), (int) s.hull, (int) s.maxHull(), s.state.name().toLowerCase())), false);
+							return s.hullPercent();
 						}))
 				.then(Commands.literal("recall")
 						.executes(c -> {
@@ -65,7 +92,7 @@ public final class ShipCommands {
 							Ship best = null;
 							double bestDist = Double.MAX_VALUE;
 							for (Ship s : m.ships()) {
-								if (!p.getUUID().equals(s.owner)) continue;
+								if (!p.getUUID().equals(s.owner) || s.state != Ship.State.AFLOAT) continue;
 								double d = s.dimension.equals(ShipManager.dimensionId(p.level())) ? p.distanceToSqr(s.x, s.y, s.z) : 1e18;
 								if (d < bestDist) {
 									bestDist = d;
@@ -74,6 +101,11 @@ public final class ShipCommands {
 							}
 							if (best == null) {
 								c.getSource().sendFailure(Component.literal("You don't have any ships afloat."));
+								return 0;
+							}
+							long left = best.lastDamagedAt + Config.current.hull.combatLockSeconds * 20L - p.level().getGameTime();
+							if (left > 0) {
+								c.getSource().sendFailure(Component.literal("Can't recall during battle (" + (left + 19) / 20 + "s)."));
 								return 0;
 							}
 							String name = best.type.displayName;

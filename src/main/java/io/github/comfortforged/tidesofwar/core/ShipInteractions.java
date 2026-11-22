@@ -73,6 +73,16 @@ public final class ShipInteractions {
 							.withStyle(ChatFormatting.RED));
 					return;
 				}
+				if (ship.state != Ship.State.AFLOAT) {
+					player.sendOverlayMessage(Component.literal("A wreck can't be packed up.").withStyle(ChatFormatting.RED));
+					return;
+				}
+				long left = ship.lastDamagedAt + Config.current.hull.combatLockSeconds * 20L - player.level().getGameTime();
+				if (left > 0) {
+					player.sendOverlayMessage(Component.literal("Can't pack up during battle (" + (left + 19) / 20 + "s).")
+							.withStyle(ChatFormatting.RED));
+					return;
+				}
 				ItemStack item = m.packUp(ship);
 				giveOrDrop(player, item);
 				player.sendSystemMessage(Component.literal("Your " + ship.type.displayName + " is packed up, cargo and all.")

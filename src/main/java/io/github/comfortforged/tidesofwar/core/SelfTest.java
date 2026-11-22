@@ -129,12 +129,14 @@ final class SelfTest {
 			// Save/load round trip.
 			Ship g = ships.get(2);
 			g.cargo.setItem(4, new ItemStack(Items.GOLD_INGOT, 37));
+			g.hull = 77.5;
 			m.save();
 			int before = m.ships().size();
 			m.load();
 			check(m.ships().size() == before, "save/load keeps all " + before + " ships");
 			Ship reloaded = m.ships().stream().filter(s -> s.id.equals(g.id)).findFirst().orElse(null);
 			check(reloaded != null && reloaded.cargo.getItem(4).getCount() == 37, "cargo survives save/load");
+			check(reloaded != null && reloaded.hull == 77.5 && reloaded.state == Ship.State.AFLOAT, "hull survives save/load");
 			// The reloaded ships are new objects; the old visuals become leftovers and must get cleaned up.
 			for (Ship s : ships) s.despawn(m);
 			ships.clear();
@@ -145,6 +147,8 @@ final class SelfTest {
 			Ship g = ships.stream().filter(s -> s.type == ShipType.GALLEON).findFirst().orElseThrow();
 			ItemStack item = m.packUp(g);
 			check(ShipItems.typeOf(item) == ShipType.GALLEON, "packed galleon item knows its type");
+			check(ShipItems.hullOf(item, ShipType.GALLEON) == 77.5, "packed item keeps the hull");
+			check(ShipItems.hullOf(ShipItems.create(ShipType.GALLEON), ShipType.GALLEON) == Config.current.maxHull(ShipType.GALLEON), "fresh item has full hull");
 			List<ItemStack> cargo = ShipItems.readCargo(item);
 			check(cargo.size() > 4 && cargo.get(4).is(Items.GOLD_INGOT) && cargo.get(4).getCount() == 37, "packed item keeps the cargo");
 			check(countParts(level, g) == 0, "packing removes the ship's entities");
@@ -159,6 +163,12 @@ final class SelfTest {
 			check(ShipItems.typeOf(ShipItems.create(ShipType.SLOOP)) == ShipType.SLOOP, "ship item round trip");
 			check(ShipItems.typeOf(new ItemStack(Items.DARK_OAK_BOAT)) == null, "plain boats are not ships");
 			checkLegacy(level, m);
+			Ship probe = new Ship(java.util.UUID.randomUUID(), ShipType.SLOOP, "minecraft:overworld", 0, 0, 0, 0, null, "t");
+			long now = level.getGameTime();
+			check(!probe.inCombat(now), "fresh ship is not in combat");
+			probe.lastDamagedAt = now;
+			check(probe.inCombat(now + 20), "ship is in combat just after a hit");
+			check(!probe.inCombat(now + Config.current.hull.combatLockSeconds * 20L + 1), "combat lock expires");
 
 			if (failures.isEmpty()) {
 				TidesOfWar.LOGGER.info("TIDESOFWAR SELFTEST PASS");
@@ -195,6 +205,8 @@ final class SelfTest {
 					+ "\"yaw\":0.0,\"ownerName\":\"Old\",\"cargo\":[]}]}");
 			m.load();
 			check(m.ships().size() == 1 && m.ships().iterator().next().id.toString().equals(id), "old pirateships/ships.json loaded");
+			Ship oldShip = m.ships().iterator().next();
+			check(oldShip.state == Ship.State.AFLOAT && oldShip.hull == oldShip.maxHull(), "old ship loads afloat with a full hull");
 			check(java.nio.file.Files.exists(current), "old ships migrated to tidesofwar/ships.json");
 			java.nio.file.Files.deleteIfExists(legacy);
 			java.nio.file.Files.deleteIfExists(current);

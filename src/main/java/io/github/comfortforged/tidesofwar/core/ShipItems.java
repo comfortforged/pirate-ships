@@ -18,22 +18,33 @@ public final class ShipItems {
 	public static final String TYPE_KEY = "tidesofwar_type";
 	/** Item data key used before the rename; ship items from older versions still work. */
 	public static final String LEGACY_TYPE_KEY = "pirateships_type";
+	public static final String HULL_KEY = "tidesofwar_hull";
 
 	private ShipItems() {}
 
 	public static ItemStack create(ShipType type) {
+		return create(type, Config.current.maxHull(type));
+	}
+
+	public static ItemStack create(ShipType type, double hull) {
 		ItemStack stack = new ItemStack(Items.DARK_OAK_BOAT);
 		CompoundTag tag = new CompoundTag();
 		tag.putString(TYPE_KEY, type.id());
+		double max = Config.current.maxHull(type);
+		if (hull < max) tag.putFloat(HULL_KEY, (float) hull);
 		stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		stack.set(net.minecraft.core.component.DataComponents.ITEM_NAME,
 				Component.literal(type.displayName).withStyle(ChatFormatting.GOLD));
 		stack.set(net.minecraft.core.component.DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 		stack.set(net.minecraft.core.component.DataComponents.RARITY, Rarity.RARE);
-		stack.set(net.minecraft.core.component.DataComponents.LORE, new ItemLore(List.of(
+		List<Component> lore = new ArrayList<>(List.of(
 				Component.literal("Right-click on open water to launch").withStyle(ChatFormatting.GRAY),
 				Component.literal(type.cargoSlots() + " cargo slots, " + type.passengerSeats + " passenger seats")
-						.withStyle(ChatFormatting.DARK_GRAY))));
+						.withStyle(ChatFormatting.DARK_GRAY)));
+		if (hull < max) {
+			lore.add(Component.literal("Hull " + Math.round(100.0 * hull / max) + "%").withStyle(ChatFormatting.RED));
+		}
+		stack.set(net.minecraft.core.component.DataComponents.LORE, new ItemLore(lore));
 		return stack;
 	}
 
@@ -46,6 +57,16 @@ public final class ShipItems {
 		String id = tag.getStringOr(TYPE_KEY, "");
 		if (id.isEmpty()) id = tag.getStringOr(LEGACY_TYPE_KEY, "");
 		return id.isEmpty() ? null : ShipType.byId(id);
+	}
+
+	/** The hull points stored on a ship item (full hull if none are stored). */
+	public static double hullOf(ItemStack stack, ShipType type) {
+		double max = Config.current.maxHull(type);
+		CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+		if (data == null) return max;
+		CompoundTag tag = data.copyTag();
+		if (!tag.contains(HULL_KEY)) return max;
+		return Math.max(1.0, Math.min(max, tag.getFloatOr(HULL_KEY, (float) max)));
 	}
 
 	public static void storeCargo(ItemStack stack, List<ItemStack> cargo) {

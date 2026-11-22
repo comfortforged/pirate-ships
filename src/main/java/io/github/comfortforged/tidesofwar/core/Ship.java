@@ -47,6 +47,20 @@ public class Ship {
 	public String ownerName;
 	public final SimpleContainer cargo;
 
+	public enum State { AFLOAT, SINKING, WRECK }
+
+	public double hull;
+	public State state = State.AFLOAT;
+	public int stateTicks;
+	public long wreckedAtGameTime;
+	/** Game time of the last hit, for the combat lock. */
+	public long lastDamagedAt = Long.MIN_VALUE / 2;
+	/** Tilt in degrees while sinking or wrecked. */
+	public float roll;
+	/** Height of the ship once it has sunk, and the water level it sank from. */
+	public double wreckY;
+	public double waterY;
+
 	/** Used only by the automated self-test to drive the ship without a player. */
 	public Input testInput;
 
@@ -71,6 +85,20 @@ public class Ship {
 		this.owner = owner;
 		this.ownerName = ownerName;
 		this.cargo = new SimpleContainer(type.cargoSlots());
+		this.hull = maxHull();
+	}
+
+	public double maxHull() {
+		return Config.current.maxHull(type);
+	}
+
+	public int hullPercent() {
+		return (int) Math.round(100.0 * hull / maxHull());
+	}
+
+	/** True shortly after the ship took damage; such a ship can't be packed up, recalled or repaired. */
+	public boolean inCombat(long gameTime) {
+		return gameTime - lastDamagedAt < Config.current.hull.combatLockSeconds * 20L;
 	}
 
 	public ShipModel model() {

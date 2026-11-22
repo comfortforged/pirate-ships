@@ -176,6 +176,7 @@ public final class ShipManager {
 		for (int i = 0; i < cargo.size() && i < ship.cargo.getContainerSize(); i++) {
 			ship.cargo.setItem(i, cargo.get(i));
 		}
+		ship.hull = ShipItems.hullOf(stack, type);
 		addShip(ship);
 		player.sendSystemMessage(Component.literal("Your " + type.displayName + " is launched! Right-click the tiller at the back to take the helm.")
 				.withStyle(ChatFormatting.GOLD));
@@ -195,7 +196,7 @@ public final class ShipManager {
 		}
 		ship.despawn(this);
 		ships.remove(ship.id);
-		ItemStack stack = ShipItems.create(ship.type);
+		ItemStack stack = ShipItems.create(ship.type, ship.hull);
 		List<ItemStack> items = new ArrayList<>();
 		for (int i = 0; i < ship.cargo.getContainerSize(); i++) items.add(ship.cargo.getItem(i).copy());
 		ShipItems.storeCargo(stack, items);
@@ -248,6 +249,13 @@ public final class ShipManager {
 			o.addProperty("y", s.y);
 			o.addProperty("z", s.z);
 			o.addProperty("yaw", s.yaw);
+			o.addProperty("hull", s.hull);
+			o.addProperty("state", s.state.name());
+			o.addProperty("stateTicks", s.stateTicks);
+			o.addProperty("wreckedAt", s.wreckedAtGameTime);
+			o.addProperty("roll", s.roll);
+			o.addProperty("wreckY", s.wreckY);
+			o.addProperty("waterY", s.waterY);
 			if (s.owner != null) o.addProperty("owner", s.owner.toString());
 			if (s.ownerName != null) o.addProperty("ownerName", s.ownerName);
 			JsonArray cargo = new JsonArray();
@@ -301,6 +309,19 @@ public final class ShipManager {
 				Ship s = new Ship(UUID.fromString(o.get("id").getAsString()), type, o.get("dimension").getAsString(),
 						o.get("x").getAsDouble(), o.get("y").getAsDouble(), o.get("z").getAsDouble(),
 						o.get("yaw").getAsFloat(), owner, ownerName);
+				if (o.has("hull")) s.hull = Math.max(0, Math.min(s.maxHull(), o.get("hull").getAsDouble()));
+				if (o.has("state")) {
+					try {
+						s.state = Ship.State.valueOf(o.get("state").getAsString());
+					} catch (IllegalArgumentException ignored) {
+						// unknown state: stay afloat
+					}
+				}
+				if (o.has("stateTicks")) s.stateTicks = o.get("stateTicks").getAsInt();
+				if (o.has("wreckedAt")) s.wreckedAtGameTime = o.get("wreckedAt").getAsLong();
+				if (o.has("roll")) s.roll = o.get("roll").getAsFloat();
+				if (o.has("wreckY")) s.wreckY = o.get("wreckY").getAsDouble();
+				if (o.has("waterY")) s.waterY = o.get("waterY").getAsDouble();
 				if (o.has("cargo")) {
 					for (JsonElement ce : o.getAsJsonArray("cargo")) {
 						JsonObject c = ce.getAsJsonObject();
