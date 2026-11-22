@@ -88,7 +88,7 @@ jobs:
         run: |
           mkdir -p run && echo "eula=true" > run/eula.txt
           printf "online-mode=false\nlevel-type=minecraft\\:flat\nspawn-protection=0\npause-when-empty-seconds=-1\n" > run/server.properties
-          timeout 600 ./gradlew ":${{ matrix.node }}:runServer" 2>&1 | tee server.log || true
+          timeout 300 ./gradlew ":${{ matrix.node }}:runServer" 2>&1 | tee server.log || true
           grep -q "TIDESOFWAR SELFTEST PASS" server.log
       - name: package
         if: steps.build.outcome == 'success'
