@@ -180,9 +180,8 @@ final class SelfTest {
 			check(!probe.inCombat(now + Config.current.hull.combatLockSeconds * 20L + 1), "combat lock expires");
 
 			checkUpgradeData(m);
-			net.minecraft.world.entity.decoration.ArmorStand probeStand = new net.minecraft.world.entity.decoration.ArmorStand(
-					net.minecraft.world.entity.EntityType.ARMOR_STAND, level);
-			probeStand.setPos(-60.5, Y + 20, 60.5);
+			net.minecraft.world.entity.item.ItemEntity probeStand = new net.minecraft.world.entity.item.ItemEntity(
+					level, -60.5, Y + 20, 60.5, new ItemStack(Items.STONE));
 			probeStand.move(net.minecraft.world.entity.MoverType.SELF, new net.minecraft.world.phys.Vec3(0, -0.1, 0));
 			check(ShipHooks.collideMixinRan, "the collision mixin is applied");
 			startCombat(level, m);

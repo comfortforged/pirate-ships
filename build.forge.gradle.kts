@@ -25,7 +25,7 @@ minecraft {
             workingDir = rootProject.layout.projectDirectory.dir("run")
         }
         register("server") {
-            args("--nogui")
+            args("--nogui", "--mixin.config", "tidesofwar.mixins.json")
             if (System.getenv("TIDESOFWAR_SELFTEST") != null) {
                 systemProperty("tidesofwar.selftest", "true")
             }
@@ -62,6 +62,7 @@ tasks {
 
     withType<Jar> {
         from("../../LICENSE") { rename { "${it}_tides-of-war" } }
+        manifest { attributes("MixinConfigs" to "tidesofwar.mixins.json") }
     }
 
     register("printClasspath") {
