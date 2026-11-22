@@ -174,7 +174,7 @@ For 6–8 the test needs a fake look pitch: add `Ship.testPitch` (used instead o
 
 ## 9. Steps (CI green on all 9 nodes after each)
 
-1. **Data + items + recipes:** `Upgrades`, `UpgradeItems`, recipes JSON (15 files: 4 parts × 3 tiers + flight core),
+1. **Data + items + recipes:** `Upgrades`, `UpgradeItems`, recipes JSON (13 files: 4 parts × 3 tiers + flight core),
    save/load, item storage, `give … upgrade`, `upgrades` command. Self-tests 1, 4.
 2. **Stats + applying + looks:** `ShipStats` everywhere, tiller apply flow, config `upgrades` section, model `Look`,
    respawn on upgrade. Self-tests 2, 3, 5.
