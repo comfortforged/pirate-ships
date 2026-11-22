@@ -341,6 +341,7 @@ public final class ShipManager {
 				Ship s = new Ship(UUID.fromString(o.get("id").getAsString()), type, o.get("dimension").getAsString(),
 						o.get("x").getAsDouble(), o.get("y").getAsDouble(), o.get("z").getAsDouble(),
 						o.get("yaw").getAsFloat(), owner, ownerName);
+				if (o.has("upgrades") && o.get("upgrades").isJsonObject()) s.upgrades = Upgrades.fromJson(o.getAsJsonObject("upgrades"));
 				if (o.has("hull")) s.hull = Math.max(0, Math.min(s.maxHull(), o.get("hull").getAsDouble()));
 				if (o.has("state")) {
 					try {
@@ -354,7 +355,6 @@ public final class ShipManager {
 				if (o.has("roll")) s.roll = o.get("roll").getAsFloat();
 				if (o.has("wreckY")) s.wreckY = o.get("wreckY").getAsDouble();
 				if (o.has("waterY")) s.waterY = o.get("waterY").getAsDouble();
-				if (o.has("upgrades") && o.get("upgrades").isJsonObject()) s.upgrades = Upgrades.fromJson(o.getAsJsonObject("upgrades"));
 				if (o.has("flying")) s.flying = o.get("flying").getAsBoolean();
 				if (o.has("onGround")) s.onGround = o.get("onGround").getAsBoolean();
 				if (o.has("cargo")) {

@@ -98,6 +98,11 @@ public final class ShipInteractions {
 				repair(ship, player, held);
 				return;
 			}
+			Upgrades.Part upgrade = UpgradeItems.partOf(held);
+			if (upgrade != null) {
+				applyUpgrade(m, ship, player, held, upgrade);
+				return;
+			}
 			if (!ship.seat(player, 0)) {
 				player.sendOverlayMessage(Component.literal("Someone is already at the helm.").withStyle(ChatFormatting.RED));
 			}
@@ -129,6 +134,31 @@ public final class ShipInteractions {
 				}
 			}
 		}
+	}
+
+	private static void applyUpgrade(ShipManager m, Ship ship, ServerPlayer player, ItemStack held, Upgrades.Part part) {
+		if (!canManage(player, ship)) {
+			player.sendOverlayMessage(Component.literal("Only " + ship.ownerName + " can upgrade this ship.").withStyle(ChatFormatting.RED));
+			return;
+		}
+		int tier = UpgradeItems.tierOf(held);
+		String error = ship.tryInstall(part, tier, player.level().getGameTime());
+		if (error != null) {
+			player.sendOverlayMessage(Component.literal(error).withStyle(ChatFormatting.RED));
+			return;
+		}
+		if (!player.isCreative()) held.shrink(1);
+		ship.despawn(m); // comes back next tick with the new look
+		player.level().playSound(null, ship.x, ship.y, ship.z, net.minecraft.sounds.SoundEvents.ANVIL_USE,
+				net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.2f);
+		String effect = switch (part) {
+			case HULL -> String.format("hull now %d points", (int) ship.maxHull());
+			case SAILS -> String.format("top speed %.1f blocks/s", ShipStats.maxSpeed(ship) * 20);
+			case RUDDER -> String.format("turn rate %.1f", ShipStats.turnRate(ship));
+			case CANNONS -> String.format("reload %.1fs, damage %d", ShipStats.reloadTicks(ship) / 20.0, (int) ShipStats.shipDamage(ship));
+			case FLIGHT -> "she can take to the air";
+		};
+		player.sendSystemMessage(Component.literal(part.nameOfTier(tier) + " installed: " + effect + ".").withStyle(ChatFormatting.AQUA));
 	}
 
 	private static void repair(Ship ship, ServerPlayer player, ItemStack held) {

@@ -23,7 +23,7 @@ public final class ShipItems {
 	private ShipItems() {}
 
 	public static ItemStack create(ShipType type) {
-		return create(type, Config.current.maxHull(type));
+		return create(type, ShipStats.maxHull(type, new Upgrades()));
 	}
 
 	public static ItemStack create(ShipType type, double hull) {
@@ -34,7 +34,7 @@ public final class ShipItems {
 		ItemStack stack = new ItemStack(Items.DARK_OAK_BOAT);
 		CompoundTag tag = new CompoundTag();
 		tag.putString(TYPE_KEY, type.id());
-		double max = Config.current.maxHull(type);
+		double max = ShipStats.maxHull(type, upgrades);
 		if (hull < max) tag.putFloat(HULL_KEY, (float) hull);
 		upgrades.toTag(tag);
 		stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, CustomData.of(tag));
@@ -75,7 +75,7 @@ public final class ShipItems {
 
 	/** The hull points stored on a ship item (full hull if none are stored). */
 	public static double hullOf(ItemStack stack, ShipType type) {
-		double max = Config.current.maxHull(type);
+		double max = ShipStats.maxHull(type, upgradesOf(stack));
 		CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
 		if (data == null) return max;
 		CompoundTag tag = data.copyTag();

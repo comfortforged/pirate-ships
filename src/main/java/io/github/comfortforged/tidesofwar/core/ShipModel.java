@@ -36,15 +36,21 @@ public final class ShipModel {
 	private static final float BOTTOM = -0.9f;
 	private static final float SIDE_TOP = 1.1f;
 
-	private static final ShipModel[] CACHE = new ShipModel[ShipType.values().length];
+	/** The parts of the look that upgrades change. Seats, cannons and buttons never depend on it. */
+	public record Look(int hullTier, int sailsTier, boolean flight) {
+		public static final Look STOCK = new Look(0, 0, false);
+	}
+
+	private record Key(ShipType type, Look look) {}
+
+	private static final java.util.Map<Key, ShipModel> CACHE = new java.util.concurrent.ConcurrentHashMap<>();
 
 	public static ShipModel of(ShipType type) {
-		ShipModel m = CACHE[type.ordinal()];
-		if (m == null) {
-			m = new ShipModel(type);
-			CACHE[type.ordinal()] = m;
-		}
-		return m;
+		return of(type, Look.STOCK);
+	}
+
+	public static ShipModel of(ShipType type, Look look) {
+		return CACHE.computeIfAbsent(new Key(type, look), k -> new ShipModel(k.type(), k.look()));
 	}
 
 	/** Half the width of the hull at slice k (0 = stern). Tapers toward the bow. */
@@ -67,12 +73,16 @@ public final class ShipModel {
 		parts.add(new Part(b, x, y, z, sx, sy, sz));
 	}
 
-	private ShipModel(ShipType type) {
+	private ShipModel(ShipType type, Look look) {
 		BlockState hull = Blocks.DARK_OAK_PLANKS.defaultBlockState();
 		BlockState deck = Blocks.SPRUCE_PLANKS.defaultBlockState();
 		BlockState trim = Blocks.STRIPPED_DARK_OAK_LOG.defaultBlockState();
 		BlockState spar = Blocks.STRIPPED_SPRUCE_LOG.defaultBlockState();
-		BlockState sail = Compat.whiteWool().defaultBlockState();
+		BlockState sail = switch (look.sailsTier()) {
+			case 2 -> Compat.whiteConcrete().defaultBlockState();
+			case 3 -> Compat.blackWool().defaultBlockState();
+			default -> Compat.whiteWool().defaultBlockState();
+		};
 
 		final int len = type.length;
 		final float stern = -len / 2f;
@@ -182,6 +192,27 @@ public final class ShipModel {
 				seats.add(new Vector3f(sx, deckY + 0.4f, z));
 				placed++;
 			}
+		}
+
+		// ---- Upgrade looks: a coloured band along the hull, and glowing pods under a flying ship. ----
+		if (look.hullTier() > 0) {
+			BlockState band = (look.hullTier() == 1 ? Blocks.CUT_COPPER : look.hullTier() == 2 ? Blocks.PRISMARINE_BRICKS : Blocks.GOLD_BLOCK).defaultBlockState();
+			int bk = 0;
+			while (bk < len) {
+				float bw = halfWidthAt(type, bk);
+				int be = bk + 1;
+				while (be < len && halfWidthAt(type, be) == bw) be++;
+				add(band, bw, 0.0f, stern + bk, 0.08f, 0.25f, be - bk);
+				add(band, -bw - 0.08f, 0.0f, stern + bk, 0.08f, 0.25f, be - bk);
+				bk = be;
+			}
+		}
+		if (look.flight()) {
+			BlockState glow = Blocks.SEA_LANTERN.defaultBlockState();
+			add(glow, -0.3f, BOTTOM - 0.2f, stern + 1.5f, 0.6f, 0.2f, len - 3f);
+			float podX = type.halfBeam * 0.6f;
+			add(glow, podX - 0.3f, BOTTOM - 0.3f, -0.3f, 0.6f, 0.4f, 0.6f);
+			add(glow, -podX - 0.3f, BOTTOM - 0.3f, -0.3f, 0.6f, 0.4f, 0.6f);
 		}
 
 		// ---- Cannons along both rails, with a gunner's seat beside the middle cannon of each side. ----

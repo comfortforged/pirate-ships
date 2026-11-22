@@ -107,7 +107,7 @@ public class Ship {
 	}
 
 	public double maxHull() {
-		return Config.current.maxHull(type);
+		return ShipStats.maxHull(this);
 	}
 
 	public int hullPercent() {
@@ -149,6 +149,28 @@ public class Ship {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Installs the next tier of an upgrade. Returns null on success, otherwise the reason it can't be done.
+	 * (The caller checks who may do it and takes the item.)
+	 */
+	public String tryInstall(Upgrades.Part part, int tier, long gameTime) {
+		if (state != State.AFLOAT) return "Only a ship afloat can be upgraded.";
+		if (inCombat(gameTime)) {
+			long left = lastDamagedAt + Config.current.hull.combatLockSeconds * 20L - gameTime;
+			return "Can't upgrade during battle (" + (left + 19) / 20 + "s).";
+		}
+		int have = upgrades.get(part);
+		if (have >= part.maxTier || tier <= have) return part.nameOfTier(Math.max(1, Math.min(have, part.maxTier))) + " is already installed.";
+		if (tier > have + 1) return "This ship needs " + part.nameOfTier(have + 1) + " first.";
+		double oldMax = maxHull();
+		upgrades.set(part, tier);
+		if (part == Upgrades.Part.HULL) hull += maxHull() - oldMax;
+		hull = Math.min(hull, maxHull());
+		ShipManager m = ShipManager.get();
+		if (m != null) m.markDirty();
+		return null;
 	}
 
 	/** Everyone off, then down she goes. */
@@ -219,7 +241,7 @@ public class Ship {
 	}
 
 	public ShipModel model() {
-		return ShipModel.of(type);
+		return ShipModel.of(type, new ShipModel.Look(upgrades.hull, upgrades.sails, upgrades.flight));
 	}
 
 	public boolean isSpawned() {
@@ -359,11 +381,11 @@ public class Ship {
 		Input in = testInput != null ? testInput : (captain != null ? captain.getLastClientInput() : Input.EMPTY);
 		tickGuns(level, captain, in);
 
-		float max = type.maxSpeed * (hullPercent() < 25 ? 0.6f : 1f);
+		float max = (float) ShipStats.maxSpeed(this) * (hullPercent() < 25 ? 0.6f : 1f);
 		if (in.forward() && !in.backward()) {
-			speed = Math.min(max, speed + type.acceleration);
+			speed = Math.min(max, speed + ShipStats.acceleration(this));
 		} else if (in.backward() && !in.forward()) {
-			speed = Math.max(-max * 0.3, speed - type.acceleration * 1.5);
+			speed = Math.max(-max * 0.3, speed - ShipStats.acceleration(this) * 1.5);
 		} else {
 			speed *= 0.985;
 			if (Math.abs(speed) < 0.002) speed = 0;
@@ -373,7 +395,7 @@ public class Ship {
 		int turn = (in.right() ? 1 : 0) - (in.left() ? 1 : 0);
 		if (turn != 0) {
 			double helm = 0.35 + 0.65 * Math.min(1.0, Math.abs(speed) / max);
-			float newYaw = wrap(yaw + (float) (turn * type.turnRate * helm));
+			float newYaw = wrap(yaw + (float) (turn * ShipStats.turnRate(this) * helm));
 			if (fits(level, x, y, z, newYaw)) {
 				yaw = newYaw;
 				moved = true;

@@ -184,6 +184,7 @@ final class SelfTest {
 		}
 		if (tick > COMBAT_START) combatStep(server, level, m, tick - COMBAT_START);
 		if (sinkBase > 0 && tick > sinkBase) sinkStep(server, level, m, tick - sinkBase);
+		if (upBase > 0 && tick > upBase) upgradeStep(server, level, m, tick - upBase);
 	}
 
 	// ------------------------------------------------------------------ cannons and ship combat
@@ -402,10 +403,81 @@ final class SelfTest {
 			check(Math.abs(wreck.y - wreck.waterY) < 0.01 && wreck.roll == 0, "raised ship is back on the surface, upright");
 			m.packUp(wreck);
 			ships.clear();
-			ships.add(wreck);
+			startUpgradeTests(level, m);
+		}
+	}
+
+	// ------------------------------------------------------------------ upgrades
+
+	private static int upBase;
+	private static Ship up;
+
+	private static void startUpgradeTests(ServerLevel level, ShipManager m) {
+		upBase = tick;
+		up = new Ship(UUID.randomUUID(), ShipType.SLOOP, ShipManager.dimensionId(level), -30.5, Y + 1 - Ship.DRAFT, 10.5, 0f,
+				UUID.randomUUID(), "upgrader");
+		m.addShip(up);
+		ships.add(up);
+	}
+
+	private static void upgradeStep(MinecraftServer server, ServerLevel level, ShipManager m, int t) {
+		long now = level.getGameTime();
+		if (t == 5) {
+			double speed0 = ShipStats.maxSpeed(up), turn0 = ShipStats.turnRate(up);
+			int reload0 = ShipStats.reloadTicks(up);
+			double dmg0 = ShipStats.shipDamage(up);
+			int stockParts = up.model().parts.size();
+			check(up.tryInstall(Upgrades.Part.SAILS, 2, now) != null, "Sails II is refused on a stock ship");
+			check(up.tryInstall(Upgrades.Part.SAILS, 1, now) == null, "Sails I installs");
+			double speed1 = ShipStats.maxSpeed(up);
+			check(speed1 > speed0, "Sails I raises top speed (" + String.format("%.3f -> %.3f", speed0, speed1) + ")");
+			check(up.tryInstall(Upgrades.Part.SAILS, 1, now) != null, "Sails I can't be installed twice");
+			check(up.tryInstall(Upgrades.Part.SAILS, 2, now) == null && ShipStats.maxSpeed(up) > speed1, "Sails II raises top speed again");
+			check(up.tryInstall(Upgrades.Part.RUDDER, 1, now) == null && ShipStats.turnRate(up) > turn0, "Rudder I raises the turn rate");
+			check(up.tryInstall(Upgrades.Part.CANNONS, 1, now) == null && ShipStats.reloadTicks(up) < reload0
+					&& ShipStats.shipDamage(up) > dmg0, "Cannons I reload faster and hit harder");
+			check(up.tryInstall(Upgrades.Part.FLIGHT, 1, now) == null && up.upgrades.flight, "Flight Core installs");
+			check(up.tryInstall(Upgrades.Part.FLIGHT, 1, now) != null, "Flight Core can't be installed twice");
+
+			double max0 = up.maxHull();
+			up.hull = 30;
+			check(up.tryInstall(Upgrades.Part.HULL, 1, now) == null, "Hull plating I installs");
+			check(Math.abs(up.maxHull() - max0 * 1.25) < 0.001, "hull plating I raises max hull by 25% (" + up.maxHull() + ")");
+			check(Math.abs(up.hull - (30 + max0 * 0.25)) < 0.001, "current hull rose by the same amount (" + up.hull + ")");
+
+			up.lastDamagedAt = now;
+			check(up.tryInstall(Upgrades.Part.HULL, 2, now) != null, "no upgrading during a battle");
+			up.lastDamagedAt = Long.MIN_VALUE / 2;
+
+			check(up.model().parts.size() > stockParts, "an upgraded ship has extra parts (" + stockParts + " -> " + up.model().parts.size() + ")");
+			check(up.model().seats.size() == ShipModel.of(up.type).seats.size()
+					&& up.model().cannons.size() == ShipModel.of(up.type).cannons.size(), "upgrades don't change seats or cannons");
+			up.despawn(m);
+		}
+		if (t == 20) {
+			check(up.isSpawned() && countParts(level, up) >= up.model().parts.size(), "upgraded ship respawns with its new parts");
+			String before = up.upgrades.summary();
+			up.damage(level, 100000);
+			check(up.state == Ship.State.SINKING, "upgraded ship sinks at zero hull");
+			upSummary = before;
+		}
+		if (t == 150) {
+			check(up.state == Ship.State.WRECK && up.upgrades.summary().equals(upSummary), "a wreck keeps its upgrades (" + up.upgrades.summary() + ")");
+			net.minecraft.world.SimpleContainer purse = new net.minecraft.world.SimpleContainer(9);
+			purse.setItem(0, new ItemStack(Items.OAK_PLANKS, 16));
+			purse.setItem(1, new ItemStack(Items.IRON_INGOT, 4));
+			check(Wrecks.raise(level, up, purse, null), "upgraded wreck can be raised");
+			check(up.upgrades.summary().equals(upSummary) && up.hull <= up.maxHull() && up.hull > 0, "a raised ship keeps its upgrades and a sane hull");
+			ItemStack item = m.packUp(up);
+			check(ShipItems.upgradesOf(item).summary().equals(upSummary), "packed upgraded ship keeps them");
+			check(ShipItems.hullOf(item, ShipType.SLOOP) <= ShipStats.maxHull(ShipType.SLOOP, ShipItems.upgradesOf(item)), "packed hull respects the upgraded maximum");
+			ships.clear();
+			ships.add(up);
 			finish(server);
 		}
 	}
+
+	private static String upSummary;
 
 	private static void finish(MinecraftServer server) {
 		{

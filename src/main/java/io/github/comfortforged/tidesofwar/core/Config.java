@@ -80,10 +80,43 @@ public final class Config {
 		}
 	}
 
+	/** Per-tier bonuses for upgrades: entry 0 is tier I, 1 is tier II, 2 is tier III. */
+	public static final class UpgradeBonuses {
+		public double[] hullBonusPercent = {25, 50, 100};
+		public double[] sailsSpeedMultiplier = {1.15, 1.30, 1.50};
+		public double[] rudderTurnMultiplier = {1.20, 1.40, 1.70};
+		public double[] cannonReloadMultiplier = {0.80, 0.65, 0.50};
+		public double[] cannonDamageMultiplier = {1.20, 1.40, 1.70};
+
+		/** The value for a tier, or {@code none} for tier 0 (not installed). */
+		static double at(double[] a, int tier, double none) {
+			if (tier <= 0 || a == null || a.length == 0) return none;
+			return a[Math.min(tier, a.length) - 1];
+		}
+
+		/** Fills any missing tiers from the defaults. */
+		private static double[] pad(double[] a, double[] def) {
+			double[] out = new double[def.length];
+			for (int i = 0; i < out.length; i++) out[i] = a != null && i < a.length ? a[i] : def[i];
+			return out;
+		}
+
+		UpgradeBonuses fixed() {
+			UpgradeBonuses d = new UpgradeBonuses();
+			hullBonusPercent = pad(hullBonusPercent, d.hullBonusPercent);
+			sailsSpeedMultiplier = pad(sailsSpeedMultiplier, d.sailsSpeedMultiplier);
+			rudderTurnMultiplier = pad(rudderTurnMultiplier, d.rudderTurnMultiplier);
+			cannonReloadMultiplier = pad(cannonReloadMultiplier, d.cannonReloadMultiplier);
+			cannonDamageMultiplier = pad(cannonDamageMultiplier, d.cannonDamageMultiplier);
+			return this;
+		}
+	}
+
 	public Cannons cannons = new Cannons();
 	public Damage damage = new Damage();
 	public Hull hull = new Hull();
 	public Wrecks wrecks = new Wrecks();
+	public UpgradeBonuses upgrades = new UpgradeBonuses();
 
 	/** The active settings. Never null. */
 	public static volatile Config current = new Config();
@@ -118,6 +151,7 @@ public final class Config {
 		if (damage == null) damage = new Damage();
 		if (hull == null) hull = new Hull();
 		if (wrecks == null) wrecks = new Wrecks();
+		upgrades = upgrades == null ? new UpgradeBonuses() : upgrades.fixed();
 		if (cannons.ammo == null) cannons.ammo = new ArrayList<>();
 		if (wrecks.raiseCost == null) wrecks.raiseCost = new Wrecks().raiseCost;
 		return this;
