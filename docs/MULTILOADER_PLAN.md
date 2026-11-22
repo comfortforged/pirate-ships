@@ -19,9 +19,13 @@ package `io.github.comfortforged.pirateships`, CI self-test passing).
 
 ## Progress
 
-- [x] **§4 Rename + migration DONE** (commit `84eab0f`, CI self-test PASS incl. legacy checks). Package/mod id/command/recipes are `tidesofwar`; old items, `pirateships/ships.json`, `pirateships_part` tags and `/pirateships` still work. Jar: `tides-of-war-0.1.0+26.3.jar`.
-- [ ] §5.1 Stonecutter skeleton (Fabric 26.3) — next.
+- [x] §4 Rename + migration (Tides of War, ARR, old items/data/command still work).
+- [x] §5.1 Stonecutter skeleton, [x] §5.2 Fabric 26.1/26.2, [x] §5.3 NeoForge x3, [x] §5.5 Forge x3.
+- [x] **All 9 nodes: build + server self-test PASS in CI** (commit `8ccb088`). Loader code is in `platform/`, version differences in `core/Compat.java`
+  (private Display/Interaction setters are reached by reflection, since only Fabric API widens them).
+- [x] §5.6 Packaging, README and project guide updated.
 - Repo is still `comfortforged/pirate-ships` on GitHub (rename pending; `add_repo` for `tides-of-war` returned not found).
+- Next: Phase 3 (cannons, hull damage, sinking). Plan it on Opus.
 
 ## 0. Decisions already made (don't re-ask)
 

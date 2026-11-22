@@ -1,5 +1,5 @@
-# pirate-ships
-Minecraft Pirate Ships Mod for Minecraft Java 26.3 (Fabric).
+# Tides of War
+A Minecraft Java mod for **26.1, 26.2 and 26.3** on **Fabric, NeoForge and Forge**. (Formerly "Pirate Ships".)
 
 Summon big pirate ships with giant sails from your inventory, sail them around, carry passengers and cargo.
 Everything runs on the server. The ships are built from Minecraft's own display blocks, so they also work
@@ -26,31 +26,51 @@ for players who join without the mod installed.
 - **Cargo:** right-click the barrel on deck to open the cargo hold.
 - **Pack up:** **Shift + right-click** the tiller. The ship goes back into your inventory with its cargo inside.
   Only the owner (or an admin) can do this.
-- **Lost your ship?** `/pirateships recall` brings your nearest ship back to your inventory, from anywhere.
+- **Lost your ship?** `/tidesofwar recall` brings your nearest ship back to your inventory, from anywhere.
 
 Ships run aground at the shore. They stop instead of sailing onto land.
 
 ## Admin commands
-- `/pirateships give <player> <sloop|brigantine|galleon>`: give a ship item.
-- `/pirateships list`: list every ship afloat, its owner and position.
+The old `/pirateships ...` command still works as an alias.
+- `/tidesofwar give <player> <sloop|brigantine|galleon>`: give a ship item.
+- `/tidesofwar list`: list every ship afloat, its owner and position.
 
-## Installing on the server (simplegamehosting.com)
-1. **Back up your world first** (download the world folder, or use the panel's backup option).
-2. In the control panel, change the server type to **Fabric** for Minecraft **26.3** and reinstall or apply. Your world is kept.
-3. Start the server once so it creates the `mods` folder, then stop it.
-4. Unzip `Pirate-Ships-Server-Mods.zip` and upload **both** jars (`pirate-ships-…jar` and `fabric-api-…jar`) into the `mods` folder.
-5. Start the server. The console should show `Pirate Ships ready: 3 ship types`.
+## Downloads
+Every push builds all nine jars (see the `ci-output` branch, one folder per version and loader):
+
+| Minecraft | Fabric | NeoForge | Forge |
+|---|---|---|---|
+| 26.1 (26.1 to 26.1.2) | `tides-of-war-fabric-0.1.0+26.1.2.jar` | `tides-of-war-neoforge-0.1.0+26.1.2.jar` | `tides-of-war-forge-0.1.0+26.1.2.jar` |
+| 26.2 | `tides-of-war-fabric-0.1.0+26.2.jar` | `tides-of-war-neoforge-0.1.0+26.2.jar` | `tides-of-war-forge-0.1.0+26.2.jar` |
+| 26.3 | `tides-of-war-fabric-0.1.0+26.3.jar` | `tides-of-war-neoforge-0.1.0+26.3.jar` | `tides-of-war-forge-0.1.0+26.3.jar` |
+
+## Installing on a server
+1. **Back up your world first.**
+2. Set the server type to **Fabric**, **NeoForge** or **Forge** for your Minecraft version, start it once so the `mods` folder exists, then stop it.
+3. Upload the matching jar into `mods`. **Fabric servers also need [Fabric API](https://modrinth.com/mod/fabric-api)**;
+   `TidesOfWar-Server-Fabric-26.3.zip` has both jars for Fabric 26.3.
+4. Start the server. The console shows `Tides of War ready: 3 ship types`.
+
+Upgrading from "Pirate Ships"? Replace the old jar with the new one. Your ships, ship items and cargo carry over.
+The first start copies `pirateships/ships.json` to `tidesofwar/ships.json` in the world folder (the old file stays as a backup).
 
 ## Players: joining with CurseForge
-1. Open the CurseForge app, then go to **Minecraft → Create Custom Profile → Import** (the small "import" link).
-2. Choose `Pirate-Ships-CurseForge-Profile.zip`. CurseForge installs Minecraft 26.3, Fabric and the mods automatically.
+1. Open the CurseForge app, then go to **Minecraft → Create Custom Profile → Import**.
+2. Choose `TidesOfWar-CurseForge-Profile.zip` (Fabric 26.3). CurseForge installs Minecraft, Fabric and the mods.
 3. Click **Play**, then **Multiplayer**, and add your server's address.
 
-Players can also join with the normal Minecraft launcher. The ships still work because everything runs on the server.
+Players can also join with the normal Minecraft launcher with no mods. The ships still work because everything runs on the server.
 
 ## Building
-GitHub Actions builds the mod on every push to `main` and runs an automated self-test on a throwaway server
-(launch, sail, run aground, turn, save/load, pack up with cargo). The finished files are pushed to the `ci-output` branch.
+One codebase, [Stonecutter](https://stonecutter.kikugie.dev) for versions and loaders:
+`src/main/java/.../core` is loader-neutral, `platform/` holds the thin Fabric, NeoForge and Forge entry classes,
+and `core/Compat.java` holds the Minecraft-version differences.
+GitHub Actions builds all nine versions on every push to `main` and runs an automated self-test on a throwaway server for each
+(launch, sail, run aground, turn, save/load, pack up with cargo, plus checks that data from the old "Pirate Ships" still loads).
+Jars are pushed to the `ci-output` branch.
+
+## License
+All Rights Reserved. See `LICENSE`.
 
 ## Roadmap
 - Phase 2: more ship types and looks
