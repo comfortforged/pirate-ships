@@ -191,6 +191,7 @@ final class SelfTest {
 		if (sinkBase > 0 && tick > sinkBase) sinkStep(server, level, m, tick - sinkBase);
 		if (upBase > 0 && tick > upBase) upgradeStep(server, level, m, tick - upBase);
 		if (flBase > 0 && tick > flBase) flightStep(server, level, m, tick - flBase);
+		if (sdBase > 0 && tick > sdBase) solidStep(server, level, m, tick - sdBase);
 	}
 
 	// ------------------------------------------------------------------ cannons and ship combat
@@ -580,6 +581,77 @@ final class SelfTest {
 			Ship fuelShip = new Ship(UUID.randomUUID(), ShipType.SLOOP, ShipManager.dimensionId(level), 0, 0, 0, 0f, null, "f");
 			fuelShip.upgrades.flight = true;
 			check(fuelShip.toggleFlight(level) != null && !fuelShip.flying, "no fuel, no take-off when fuel is configured");
+			ships.clear();
+			startSolidTests(level, m);
+		}
+	}
+
+	// ------------------------------------------------------------------ solid decks (server side)
+
+	private static int sdBase;
+	private static Ship sd;
+	private static net.minecraft.world.entity.item.ItemEntity sdItem;
+
+	private static net.minecraft.world.entity.item.ItemEntity makeItem(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		var item = new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y, at.z, new ItemStack(Items.STONE));
+		item.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+		item.setNoGravity(false);
+		return item;
+	}
+
+	private static void startSolidTests(ServerLevel level, ShipManager m) {
+		sdBase = tick;
+		Config.current = new Config();
+		sd = new Ship(UUID.randomUUID(), ShipType.SLOOP, ShipManager.dimensionId(level), -30.5, Y + 1 - Ship.DRAFT, 10.5, 0f,
+				UUID.randomUUID(), "deck");
+		sd.testInput = new Input(false, false, false, false, false, false, false);
+		m.addShip(sd);
+		ships.add(sd);
+	}
+
+	private static void solidStep(MinecraftServer server, ServerLevel level, ShipManager m, int t) {
+		if (t == 10) {
+			check(sd.isSolid(), "a floating ship is solid");
+			var at = sd.pose();
+			net.minecraft.world.phys.Vec3 top = ShipFrame.toWorld(at, 1.0, 4.0, 1.5);
+			var item = makeItem(level, top);
+			item.move(net.minecraft.world.entity.MoverType.SELF, new net.minecraft.world.phys.Vec3(0, -6, 0));
+			double rest = at.y() + ShipCollision.DECK_TOP;
+			check(Math.abs(item.getY() - rest) < 0.02, "a dropped item lands on the deck, not in the water (" + String.format("%.3f vs %.3f", item.getY(), rest) + ")");
+			net.minecraft.world.phys.Vec3 beside = ShipFrame.toWorld(at, ShipType.SLOOP.halfBeam + 2.0, ShipCollision.DECK_TOP + 0.5, 1.5);
+			var out = makeItem(level, beside);
+			out.move(net.minecraft.world.entity.MoverType.SELF, ShipFrame.dirToWorld(at.yaw(), new net.minecraft.world.phys.Vec3(-6, 0, 0)));
+			net.minecraft.world.phys.Vec3 ol = ShipFrame.toLocal(at, out.position());
+			check(ol.x > ShipType.SLOOP.halfBeam - 0.3, "an item pushed at the hull from outside is stopped by it (local x " + String.format("%.2f", ol.x) + ")");
+
+			sdItem = makeItem(level, ShipFrame.toWorld(at, 1.0, ShipCollision.DECK_TOP + 0.05, 1.5));
+			level.addFreshEntity(sdItem);
+			flY0 = sd.x;
+			flZ0 = sd.z;
+			sd.testInput = new Input(true, false, false, false, false, false, false);
+		}
+		if (t == 30) {
+			sd.testInput = new Input(true, false, false, true, false, false, false);
+		}
+		if (t == 60) {
+			sd.testInput = new Input(false, false, false, false, false, false, false);
+		}
+		if (t == 70) {
+			double moved = Math.hypot(sd.x - flY0, sd.z - flZ0);
+			check(moved > 1.0, "the ship sailed and turned (" + String.format("%.1f blocks, yaw %.0f", moved, sd.yaw) + ")");
+			net.minecraft.world.phys.Vec3 l = ShipFrame.toLocal(sd.pose(), sdItem.position());
+			check(!sdItem.isRemoved() && Math.abs(l.x - 1.0) < 0.5 && Math.abs(l.z - 1.5) < 0.5 && Math.abs(l.y - ShipCollision.DECK_TOP) < 0.2,
+					"an item on the deck is carried along (local " + String.format("%.2f, %.2f, %.2f", l.x, l.y, l.z) + ")");
+			sdItem.discard();
+			sd.damage(level, 100000);
+		}
+		if (t == 250) {
+			check(sd.state == Ship.State.WRECK && !sd.isSolid(), "a wreck is not solid");
+			var at = sd.pose();
+			var item = makeItem(level, ShipFrame.toWorld(at, 1.0, 3.0, 1.5));
+			item.move(net.minecraft.world.entity.MoverType.SELF, new net.minecraft.world.phys.Vec3(0, -4, 0));
+			check(item.getY() < at.y() + ShipCollision.DECK_TOP - 0.3, "things fall through a wreck (" + String.format("%.2f vs deck %.2f", item.getY(), at.y() + ShipCollision.DECK_TOP) + ")");
+			m.packUp(sd);
 			ships.clear();
 			finish(server);
 		}

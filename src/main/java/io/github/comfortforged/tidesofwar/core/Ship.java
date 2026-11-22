@@ -300,6 +300,33 @@ public class Ship {
 
 	// ------------------------------------------------------------------ geometry
 
+	/** Where the ship's models really are right now (the sea's gentle bobbing included). */
+	public ShipFrame.Pose pose() {
+		return new ShipFrame.Pose(x, Float.isNaN(lastSentBob) ? y : y + lastSentBob, z, yaw);
+	}
+
+	/** Solid ships can be stood on. Sinking ships, wrecks and ships still rising are not. */
+	public boolean isSolid() {
+		return spawned && state == State.AFLOAT && rising == 0;
+	}
+
+	/** Moves everything that stands on the deck by the ship's own motion this tick. */
+	private void carry(ServerLevel level, ShipFrame.Pose before, ShipFrame.Pose after) {
+		double reach = type.length / 2.0 + 3;
+		net.minecraft.world.phys.AABB zone = new net.minecraft.world.phys.AABB(after.x() - reach, after.y() - 1, after.z() - reach,
+				after.x() + reach, after.y() + 6, after.z() + reach);
+		float dyaw = after.yaw() - before.yaw();
+		double halfBeam = type.halfBeam + 0.3, halfLen = type.length / 2.0 + 0.5;
+		for (Entity e : level.getEntities((Entity) null, zone,
+				en -> !(en instanceof net.minecraft.world.entity.player.Player) && !isPart(en) && !en.isPassenger() && !en.isRemoved())) {
+			Vec3 l = ShipFrame.toLocal(before, e.position());
+			if (Math.abs(l.x) > halfBeam || Math.abs(l.z) > halfLen
+					|| l.y < ShipCollision.DECK_TOP - 0.3 || l.y > ShipCollision.CASTLE_TOP + 2.6) continue;
+			Vec3 w = ShipFrame.toWorld(after, l.x, l.y, l.z);
+			e.snapTo(w.x, w.y, w.z, e.getYRot() + dyaw, e.getXRot());
+		}
+	}
+
 	/** Turns a point in ship coordinates into world coordinates for the given heading. */
 	public static Vec3 toWorld(double ox, double oy, double oz, float yaw, double lx, double ly, double lz) {
 		double r = Math.toRadians(yaw);
@@ -423,6 +450,7 @@ public class Ship {
 			tickRising();
 			return;
 		}
+		ShipFrame.Pose poseBefore = pose();
 		ServerPlayer captain = captain();
 		Input in = testInput != null ? testInput : (captain != null ? captain.getLastClientInput() : Input.EMPTY);
 		tickGuns(level, captain, in);
@@ -459,6 +487,8 @@ public class Ship {
 		}
 
 		if (spawned) updateEntities(moved);
+		ShipFrame.Pose poseAfter = pose();
+		if (spawned && !poseAfter.equals(poseBefore)) carry(level, poseBefore, poseAfter);
 
 		if (captain != null && age % 10 == 0) {
 			double bps = speed * 20.0;
