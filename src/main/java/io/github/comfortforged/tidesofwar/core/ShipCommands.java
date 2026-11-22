@@ -37,6 +37,13 @@ public final class ShipCommands {
 													+ targets.size() + " player(s)"), true);
 											return targets.size();
 										}))))
+				.then(Commands.literal("reload")
+						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+						.executes(c -> {
+							Config.load();
+							c.getSource().sendSuccess(() -> Component.literal("Tides of War config reloaded."), true);
+							return 1;
+						}))
 				.then(Commands.literal("list")
 						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 						.executes(c -> {

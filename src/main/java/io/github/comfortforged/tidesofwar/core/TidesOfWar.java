@@ -21,6 +21,7 @@ public final class TidesOfWar {
 	}
 
 	public static void onServerStarted(MinecraftServer server) {
+		Config.load();
 		ShipManager.start(server);
 		if (selfTestEnabled()) SelfTest.setup(server);
 	}
