@@ -196,7 +196,7 @@ public final class ShipModel {
 
 		// ---- Upgrade looks: a coloured band along the hull, and glowing pods under a flying ship. ----
 		if (look.hullTier() > 0) {
-			BlockState band = (look.hullTier() == 1 ? Blocks.CUT_COPPER : look.hullTier() == 2 ? Blocks.PRISMARINE_BRICKS : Blocks.GOLD_BLOCK).defaultBlockState();
+			BlockState band = (look.hullTier() == 1 ? Blocks.IRON_BLOCK : look.hullTier() == 2 ? Blocks.PRISMARINE_BRICKS : Blocks.GOLD_BLOCK).defaultBlockState();
 			int bk = 0;
 			while (bk < len) {
 				float bw = halfWidthAt(type, bk);
