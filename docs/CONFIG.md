@@ -45,3 +45,25 @@ Item ids are like `minecraft:gunpowder`; a leading `#` means an item tag (`#mine
 | `raiseHullPercent` | `25` | Hull percentage a raised wreck comes back with. |
 | `raiseCost` | sloop: 16 planks + 4 iron ingots; brigantine: 32 planks + 8 iron; galleon: 64 planks + 2 iron blocks | What the owner pays to raise a wreck (all items listed). |
 | `lifetimeDays` | `0` | Wrecks older than this many in-game days vanish and spill their cargo. `0` = never. |
+
+## `upgrades`
+Each list has one value per tier (I, II, III).
+| Key | Default | Meaning |
+|---|---|---|
+| `hullBonusPercent` | `[25, 50, 100]` | Extra maximum hull. |
+| `sailsSpeedMultiplier` | `[1.15, 1.30, 1.50]` | Top speed multiplier. |
+| `rudderTurnMultiplier` | `[1.20, 1.40, 1.70]` | Turn rate multiplier. |
+| `cannonReloadMultiplier` | `[0.80, 0.65, 0.50]` | Reload time multiplier (lower is faster). |
+| `cannonDamageMultiplier` | `[1.20, 1.40, 1.70]` | Cannonball damage multiplier. |
+
+## `flight`
+| Key | Default | Meaning |
+|---|---|---|
+| `enabled` | `true` | Ships with a Flight Core can fly. Turning it off brings flying ships down. |
+| `speedMultiplier` | `1.0` | Top speed multiplier while flying. |
+| `climbRate` | `0.25` | Most blocks per tick the ship climbs or dives. |
+| `maxHeightAboveGround` | `48` | Highest a ship climbs above the ground. |
+| `maxY` | `300` | Absolute ceiling. |
+| `allowedDimensions` | overworld, the end | Dimensions where flying works. |
+| `fuel` | `[]` | Items (like `ammo`, any one of them works) burned from the cargo while airborne. Empty = free flight. Example: `[{"item": "minecraft:coal", "count": 1}]`. |
+| `fuelSeconds` | `30` | One lot of fuel is burned this often. With none left the ship glides down. |

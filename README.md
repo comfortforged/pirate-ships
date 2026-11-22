@@ -50,12 +50,41 @@ Every ship carries cannons on both rails: the sloop 1 per side, the brigantine 3
 All of these numbers can be changed in `config/tidesofwar.json` (see `docs/CONFIG.md`).
 Admins: if you use claim or protection plugins that don't watch explosions, set `"blockDamage": false`.
 
+## Upgrades and flight
+Craft upgrade items, then **right-click the ship's tiller while holding one** to install it (owner or admin, not during a
+battle). There are 3 tiers per part, installed in order (tier I, then II, then III). Upgrades are never lost: they stay through
+sinking, raising and packing the ship into your inventory.
+
+| Part | Effect (I / II / III) | Recipe (same shape for each tier, metal = iron / diamond / netherite) |
+|---|---|---|
+| Hull plating | +25% / +50% / +100% hull | `M P M` / `P M P` / `M P M` (P = planks) |
+| Sails | speed x1.15 / x1.30 / x1.50 | `WWW` / `W M W` / `WWW` (W = wool) |
+| Rudder | turning x1.20 / x1.40 / x1.70 | ` M ` / `L M L` / ` L ` (L = logs) |
+| Cannons | reload x0.80 / x0.65 / x0.50, damage x1.20 / x1.40 / x1.70 | `M G M` / `G M G` / `M G M` (G = gunpowder) |
+| Flight Core (one tier) | the ship can fly | `P E P` / `E Y E` / `P E P` (P = phantom membrane, E = ender pearl, Y = elytra) |
+
+Upgraded ships look different: hull bands (iron, prismarine, gold), better sails (white concrete, black wool) and glowing
+pods and a sea-lantern keel for the Flight Core.
+
+**Flying:** with a Flight Core, press **Ctrl** at the helm to take off (and again to start landing). The ship climbs
+when you look up and dives when you look down, and **W/S/A/D** still drive and steer. If Ctrl doesn't work for you, use
+`/tidesofwar fly`.
+- Flight stops 48 blocks above the ground, at Y 300, and in dimensions not on the allowed list.
+- Landing on water puts the ship back on the surface. Landing on solid ground **beaches** it: it can't sail, but the cannons
+  work and Ctrl takes off again.
+- Zero hull in the air: riders get Slow Falling, the ship falls and becomes a wreck where it lands (or sinks if it hits water).
+  A wreck on dry land can only be raised if it has a Flight Core.
+- Optional fuel (off by default): see `flight.fuel` in `docs/CONFIG.md`.
+
 ## Admin commands
 The old `/pirateships ...` command still works as an alias.
 - `/tidesofwar give <player> <sloop|brigantine|galleon>`: give a ship item.
 - `/tidesofwar list`: list every ship, its owner, position, hull and state.
 - `/tidesofwar reload`: reload `config/tidesofwar.json` without restarting.
 - `/tidesofwar repair`: fully repair the nearest ship (a wreck rises again if there is open water above it).
+- `/tidesofwar give <player> upgrade <hull|sails|rudder|cannons|flight> [tier]`: give an upgrade item.
+- `/tidesofwar upgrades`: show the upgrades of the ship you are on, or your nearest one.
+- `/tidesofwar fly` (anyone): toggle flight on the ship you are on, or your nearest one (needs a Flight Core).
 - `/tidesofwar hull` (anyone): show the hull of the ship you are on, or your nearest one.
 
 ## Downloads
@@ -63,9 +92,9 @@ Every push builds all nine jars (see the `ci-output` branch, one folder per vers
 
 | Minecraft | Fabric | NeoForge | Forge |
 |---|---|---|---|
-| 26.1 (26.1 to 26.1.2) | `tides-of-war-fabric-0.2.0+26.1.2.jar` | `tides-of-war-neoforge-0.2.0+26.1.2.jar` | `tides-of-war-forge-0.2.0+26.1.2.jar` |
-| 26.2 | `tides-of-war-fabric-0.2.0+26.2.jar` | `tides-of-war-neoforge-0.2.0+26.2.jar` | `tides-of-war-forge-0.2.0+26.2.jar` |
-| 26.3 | `tides-of-war-fabric-0.2.0+26.3.jar` | `tides-of-war-neoforge-0.2.0+26.3.jar` | `tides-of-war-forge-0.2.0+26.3.jar` |
+| 26.1 (26.1 to 26.1.2) | `tides-of-war-fabric-0.3.0+26.1.2.jar` | `tides-of-war-neoforge-0.3.0+26.1.2.jar` | `tides-of-war-forge-0.3.0+26.1.2.jar` |
+| 26.2 | `tides-of-war-fabric-0.3.0+26.2.jar` | `tides-of-war-neoforge-0.3.0+26.2.jar` | `tides-of-war-forge-0.3.0+26.2.jar` |
+| 26.3 | `tides-of-war-fabric-0.3.0+26.3.jar` | `tides-of-war-neoforge-0.3.0+26.3.jar` | `tides-of-war-forge-0.3.0+26.3.jar` |
 
 ## Installing on a server
 1. **Back up your world first.**
@@ -98,4 +127,5 @@ All Rights Reserved. See `LICENSE`.
 ## Roadmap
 - Phase 2: more ship types and looks
 - Phase 3 (done in 0.2.0): cannons, hull damage, sinking and wrecks
-- Phase 4: upgrades for cannons, sails (speed), tiller (turning) and hull (armour), plus a flight upgrade
+- Phase 4 (done in 0.3.0): upgrades for hull, sails, rudder and cannons, plus a Flight Core
+- Next: buying ships (economy) and more ship types
