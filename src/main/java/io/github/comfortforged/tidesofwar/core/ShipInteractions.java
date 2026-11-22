@@ -101,8 +101,11 @@ public final class ShipInteractions {
 		if (clicked instanceof Interaction) {
 			int idx = ship.seatButtons.indexOf(clicked);
 			if (idx >= 0 && !ship.seat(player, idx + 1)) {
-				int free = ship.firstFreePassengerSeat();
-				if (free < 0 || !ship.seat(player, free)) {
+				boolean gunner = idx + 1 > ship.type.passengerSeats;
+				int free = gunner ? -1 : ship.firstFreePassengerSeat();
+				if (gunner) {
+					player.sendOverlayMessage(Component.literal("Someone is already manning those guns.").withStyle(ChatFormatting.RED));
+				} else if (free < 0 || !ship.seat(player, free)) {
 					player.sendOverlayMessage(Component.literal("All seats are taken.").withStyle(ChatFormatting.RED));
 				}
 			}

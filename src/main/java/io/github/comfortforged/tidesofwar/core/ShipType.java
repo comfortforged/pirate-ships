@@ -9,9 +9,9 @@ import java.util.Locale;
  */
 public enum ShipType {
 	//        name               length beam  masts (fraction of length from stern, height)        maxSpeed accel  turn  cargoRows seats cargoAt
-	SLOOP("Pirate Sloop", 11, 2.0f, new float[][]{{0.55f, 10f}}, 0.45f, 0.0065f, 3.0f, 3, 3, 0.30f),
-	BRIGANTINE("Pirate Brigantine", 16, 3.0f, new float[][]{{0.45f, 14f}, {0.72f, 11.5f}}, 0.38f, 0.0045f, 2.0f, 3, 5, 0.30f),
-	GALLEON("Pirate Galleon", 24, 4.0f, new float[][]{{0.30f, 13f}, {0.52f, 18f}, {0.74f, 14.5f}}, 0.30f, 0.0030f, 1.3f, 6, 7, 0.41f);
+	SLOOP("Pirate Sloop", 11, 2.0f, new float[][]{{0.55f, 10f}}, 0.45f, 0.0065f, 3.0f, 3, 3, 0.30f, 1),
+	BRIGANTINE("Pirate Brigantine", 16, 3.0f, new float[][]{{0.45f, 14f}, {0.72f, 11.5f}}, 0.38f, 0.0045f, 2.0f, 3, 5, 0.30f, 3),
+	GALLEON("Pirate Galleon", 24, 4.0f, new float[][]{{0.30f, 13f}, {0.52f, 18f}, {0.74f, 14.5f}}, 0.30f, 0.0030f, 1.3f, 6, 7, 0.41f, 5);
 
 	public final String displayName;
 	public final int length;
@@ -24,9 +24,11 @@ public enum ShipType {
 	public final int cargoRows;
 	public final int passengerSeats;
 	public final float cargoAt;
+	/** Cannons on each side (so twice this many in total). */
+	public final int cannonsPerSide;
 
 	ShipType(String displayName, int length, float halfBeam, float[][] masts, float maxSpeed, float acceleration,
-			float turnRate, int cargoRows, int passengerSeats, float cargoAt) {
+			float turnRate, int cargoRows, int passengerSeats, float cargoAt, int cannonsPerSide) {
 		this.displayName = displayName;
 		this.length = length;
 		this.halfBeam = halfBeam;
@@ -37,6 +39,7 @@ public enum ShipType {
 		this.cargoRows = cargoRows;
 		this.passengerSeats = passengerSeats;
 		this.cargoAt = cargoAt;
+		this.cannonsPerSide = cannonsPerSide;
 	}
 
 	public String id() {

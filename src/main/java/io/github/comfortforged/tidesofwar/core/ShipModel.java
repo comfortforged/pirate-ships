@@ -18,6 +18,15 @@ public final class ShipModel {
 	public final List<Part> parts = new ArrayList<>();
 	/** Seat 0 is the captain's seat at the tiller; the rest are passenger benches. */
 	public final List<Vector3f> seats = new ArrayList<>();
+	/** A cannon on the rail. side is PORT (+1, left of the bow, local +x) or STARBOARD (-1). */
+	public record Cannon(float x, float y, float z, int side) {}
+
+	public static final int PORT = 1;
+	public static final int STARBOARD = -1;
+
+	public final List<Cannon> cannons = new ArrayList<>();
+	public int portGunnerSeat = -1;
+	public int starboardGunnerSeat = -1;
 	public Vector3f tiller;
 	public Vector3f cargo;
 	/** Points around the hull at the waterline used to stop the ship running aground. */
@@ -174,6 +183,42 @@ public final class ShipModel {
 				placed++;
 			}
 		}
+
+		// ---- Cannons along both rails, with a gunner's seat beside the middle cannon of each side. ----
+		int n = type.cannonsPerSide;
+		float cStart = stern + castleLen + 1.2f;
+		float cEnd = bow - 2.0f;
+		BlockState barrel = Blocks.POLISHED_BLACKSTONE.defaultBlockState();
+		BlockState carriage = Blocks.DARK_OAK_SLAB.defaultBlockState();
+		float[] cannonZ = new float[n];
+		for (int i = 0; i < n; i++) {
+			float z = cStart + (cEnd - cStart) * (i + 0.5f) / n;
+			cannonZ[i] = z;
+			int slice = Math.max(0, Math.min(len - 1, (int) Math.floor(z - stern)));
+			float w = halfWidthAt(type, slice);
+			for (int side : new int[]{PORT, STARBOARD}) {
+				// Carriage on the deck, barrel poking out over the rail.
+				float inner = side * (w - 1.2f), outer = side * (w + 0.45f);
+				add(carriage, Math.min(inner, side * (w - 0.2f)), deckY, z - 0.4f, 1.0f, 0.4f, 0.8f);
+				add(barrel, Math.min(inner, outer), deckY + 0.4f, z - 0.2f, Math.abs(outer - inner), 0.4f, 0.4f);
+				cannons.add(new Cannon(side * w, deckY + 0.6f, z, side));
+			}
+		}
+		float gz = cannonZ[n / 2];
+		int gslice = Math.max(0, Math.min(len - 1, (int) Math.floor(gz - stern)));
+		float gx = halfWidthAt(type, gslice) - 1.9f;
+		BlockState stool = Blocks.SPRUCE_SLAB.defaultBlockState();
+		portGunnerSeat = seats.size();
+		add(stool, gx - 0.3f, deckY, gz - 0.3f, 0.6f, 0.6f, 0.6f);
+		seats.add(new Vector3f(gx, deckY + 0.3f, gz));
+		starboardGunnerSeat = seats.size();
+		add(stool, -gx - 0.3f, deckY, gz - 0.3f, 0.6f, 0.6f, 0.6f);
+		seats.add(new Vector3f(-gx, deckY + 0.3f, gz));
+	}
+
+	/** Seat index of the gunner on the given side (PORT or STARBOARD). */
+	public int gunnerSeat(int side) {
+		return side == PORT ? portGunnerSeat : starboardGunnerSeat;
 	}
 
 	private void sailWithYards(BlockState sail, BlockState spar, float width, float y0, float y1, float mz) {

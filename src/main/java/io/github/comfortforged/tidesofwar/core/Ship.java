@@ -320,7 +320,7 @@ public class Ship {
 	}
 
 	public int firstFreePassengerSeat() {
-		for (int i = 1; i < seats.size(); i++) {
+		for (int i = 1; i <= type.passengerSeats && i < seats.size(); i++) {
 			if (seats.get(i).getPassengers().isEmpty()) return i;
 		}
 		return -1;

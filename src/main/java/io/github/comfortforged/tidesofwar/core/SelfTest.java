@@ -94,6 +94,11 @@ final class SelfTest {
 				check(s.isSpawned(), s.type.id() + " spawned its visuals");
 				int expected = ShipModel.of(s.type).parts.size();
 				check(countParts(level, s) >= expected, s.type.id() + " has " + expected + "+ part entities");
+				ShipModel model = ShipModel.of(s.type);
+				check(model.cannons.size() == 2 * s.type.cannonsPerSide, s.type.id() + " has " + 2 * s.type.cannonsPerSide + " cannons");
+				check(s.seats.size() == s.type.passengerSeats + 3, s.type.id() + " has helm, benches and two gunner seats");
+				check(model.gunnerSeat(ShipModel.PORT) == s.type.passengerSeats + 1
+						&& model.gunnerSeat(ShipModel.STARBOARD) == s.type.passengerSeats + 2, s.type.id() + " gunner seats come after the benches");
 				s.testInput = FORWARD;
 			}
 		}
