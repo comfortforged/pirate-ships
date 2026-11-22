@@ -66,6 +66,10 @@ public final class ShipInteractions {
 	}
 
 	static void handleShipClick(ShipManager m, Ship ship, ServerPlayer player, Entity clicked) {
+		if (clicked == ship.tillerButton && ship.state != Ship.State.AFLOAT) {
+			wreckClick(ship, player);
+			return;
+		}
 		if (clicked == ship.tillerButton) {
 			if (player.isShiftKeyDown()) {
 				if (!canManage(player, ship)) {
@@ -89,13 +93,28 @@ public final class ShipInteractions {
 						.withStyle(ChatFormatting.GOLD));
 				return;
 			}
+			ItemStack held = player.getMainHandItem();
+			if (ship.hull < ship.maxHull() && ItemMatch.matches(held, Config.current.hull.repairItem)) {
+				repair(ship, player, held);
+				return;
+			}
 			if (!ship.seat(player, 0)) {
 				player.sendOverlayMessage(Component.literal("Someone is already at the helm.").withStyle(ChatFormatting.RED));
 			}
 			return;
 		}
 		if (clicked == ship.cargoButton) {
-			m.openCargo(player, ship);
+			if (ship.state == Ship.State.SINKING) {
+				player.sendOverlayMessage(Component.literal("She's going down!").withStyle(ChatFormatting.RED));
+			} else if (!Wrecks.mayLoot(player, ship)) {
+				player.sendOverlayMessage(Component.literal("Only " + ship.ownerName + " can loot this wreck.").withStyle(ChatFormatting.RED));
+			} else {
+				m.openCargo(player, ship);
+			}
+			return;
+		}
+		if (clicked instanceof Interaction && ship.state != Ship.State.AFLOAT) {
+			player.sendOverlayMessage(Component.literal("This ship is wrecked.").withStyle(ChatFormatting.RED));
 			return;
 		}
 		if (clicked instanceof Interaction) {
@@ -109,6 +128,38 @@ public final class ShipInteractions {
 					player.sendOverlayMessage(Component.literal("All seats are taken.").withStyle(ChatFormatting.RED));
 				}
 			}
+		}
+	}
+
+	private static void repair(Ship ship, ServerPlayer player, ItemStack held) {
+		long now = player.level().getGameTime();
+		if (ship.inCombat(now)) {
+			long left = ship.lastDamagedAt + Config.current.hull.combatLockSeconds * 20L - now;
+			player.sendOverlayMessage(Component.literal("Can't repair during battle (" + (left + 19) / 20 + "s).").withStyle(ChatFormatting.RED));
+			return;
+		}
+		int before = ship.hullPercent();
+		if (!player.isCreative()) held.shrink(1);
+		ship.hull = Math.min(ship.maxHull(), ship.hull + Config.current.hull.repairPerItem);
+		ShipManager.get().markDirty();
+		player.sendOverlayMessage(Component.literal("Hull " + before + "% \u2192 " + ship.hullPercent() + "%").withStyle(ChatFormatting.GREEN));
+	}
+
+	private static void wreckClick(Ship ship, ServerPlayer player) {
+		if (ship.state == Ship.State.SINKING) {
+			player.sendOverlayMessage(Component.literal("She's going down!").withStyle(ChatFormatting.RED));
+			return;
+		}
+		if (!canManage(player, ship)) {
+			player.sendOverlayMessage(Component.literal("The wreck of " + ship.ownerName + "'s " + ship.type.displayName + ".").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		if (player.isShiftKeyDown() && player.level() instanceof ServerLevel sl) {
+			Wrecks.raise(sl, ship, player.getInventory(), player);
+		} else {
+			boolean has = Wrecks.canAfford(player.getInventory(), ship);
+			player.sendSystemMessage(Component.literal("Your wrecked " + ship.type.displayName + " can be raised for " + Wrecks.costText(ship)
+					+ (has ? ". You have it all: Shift + right-click the tiller to raise her." : ". You don't have enough yet.")).withStyle(ChatFormatting.GOLD));
 		}
 	}
 

@@ -40,7 +40,7 @@ final class Impacts {
 		DamageSource source = level.damageSources().explosion(null, attacker);
 
 		if (kind.equals("SHIP") && Rules.canHurtShip(ball.source, ball.shooter, ship)) {
-			ship.damage(ShipStats.shipDamage(ball.source), level.getGameTime());
+			ship.damage(level, ShipStats.shipDamage(ball.source));
 		}
 		if (kind.equals("ENTITY") && entity != null && Rules.canHurtEntity(entity)) {
 			entity.hurtServer(level, source, (float) ShipStats.entityDamage(ball.source));

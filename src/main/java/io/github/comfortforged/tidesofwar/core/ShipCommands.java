@@ -85,6 +85,32 @@ public final class ShipCommands {
 									s.type.displayName, s.hullPercent(), (int) s.hull, (int) s.maxHull(), s.state.name().toLowerCase())), false);
 							return s.hullPercent();
 						}))
+				.then(Commands.literal("repair")
+						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+						.executes(c -> {
+							ServerPlayer p = c.getSource().getPlayerOrException();
+							ShipManager m = ShipManager.get();
+							Ship best = null;
+							double bestDist = Double.MAX_VALUE;
+							for (Ship s : m.ships()) {
+								if (!s.dimension.equals(ShipManager.dimensionId(p.level()))) continue;
+								double d = p.distanceToSqr(s.x, s.y, s.z);
+								if (d < bestDist) {
+									bestDist = d;
+									best = s;
+								}
+							}
+							if (best == null || !(p.level() instanceof net.minecraft.server.level.ServerLevel sl)) {
+								c.getSource().sendFailure(Component.literal("No ship nearby."));
+								return 0;
+							}
+							if (!Wrecks.repairFully(sl, best)) {
+								c.getSource().sendFailure(Component.literal("Not enough open water above the wreck to raise it."));
+								return 0;
+							}
+							c.getSource().sendSuccess(() -> Component.literal("Repaired the nearest ship."), true);
+							return 1;
+						}))
 				.then(Commands.literal("recall")
 						.executes(c -> {
 							ServerPlayer p = c.getSource().getPlayerOrException();
@@ -100,7 +126,10 @@ public final class ShipCommands {
 								}
 							}
 							if (best == null) {
-								c.getSource().sendFailure(Component.literal("You don't have any ships afloat."));
+								boolean wreck = m.ships().stream().anyMatch(s -> p.getUUID().equals(s.owner) && s.state != Ship.State.AFLOAT);
+								c.getSource().sendFailure(Component.literal(wreck
+										? "Your ship is a wreck. Raise it from its tiller (Shift + right-click) first."
+										: "You don't have any ships afloat."));
 								return 0;
 							}
 							long left = best.lastDamagedAt + Config.current.hull.combatLockSeconds * 20L - p.level().getGameTime();

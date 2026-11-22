@@ -53,6 +53,14 @@ final class Compat {
 		invoke(Display.class, d, "setPosRotInterpolationDuration", int.class, ticks);
 	}
 
+	static void setTransformationInterpolationDuration(Display d, int ticks) {
+		invoke(Display.class, d, "setTransformationInterpolationDuration", int.class, ticks);
+	}
+
+	static void setTransformationInterpolationDelay(Display d, int ticks) {
+		invoke(Display.class, d, "setTransformationInterpolationDelay", int.class, ticks);
+	}
+
 	static void setViewRange(Display d, float range) {
 		invoke(Display.class, d, "setViewRange", float.class, range);
 	}

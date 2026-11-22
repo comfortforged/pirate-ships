@@ -3,6 +3,7 @@ package io.github.comfortforged.tidesofwar.core;
 import com.mojang.math.Transformation;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -68,6 +69,11 @@ public class Ship {
 	/** Space was held last tick: captain, port gunner, starboard gunner. */
 	private final boolean[] lastJump = new boolean[3];
 
+	/** Ticks left of the rising animation after a wreck was raised (not saved). */
+	int rising;
+	private float appliedRoll = Float.NaN;
+	private long lastRollSent = Long.MIN_VALUE;
+
 	/** Used only by the automated self-test to drive the ship without a player. */
 	public Input testInput;
 
@@ -120,11 +126,66 @@ public class Ship {
 		reloadUntil[sideIndex(side)] = until;
 	}
 
-	/** Takes hull damage from a hit. Does nothing unless the ship is afloat. */
-	public void damage(double amount, long gameTime) {
+	/** Takes hull damage from a hit. Does nothing unless the ship is afloat. Sinks at zero hull. */
+	public void damage(ServerLevel level, double amount) {
 		if (state != State.AFLOAT) return;
 		hull = Math.max(0, hull - amount);
-		lastDamagedAt = gameTime;
+		lastDamagedAt = level.getGameTime();
+		ShipManager m = ShipManager.get();
+		if (m != null) m.markDirty();
+		if (hull <= 0) {
+			startSinking(level);
+		} else {
+			for (Display.ItemDisplay seat : seats) {
+				for (Entity e : seat.getPassengers()) {
+					if (e instanceof ServerPlayer sp) {
+						sp.sendOverlayMessage(Component.literal("Hit! Hull " + hullPercent() + "%").withStyle(ChatFormatting.RED));
+					}
+				}
+			}
+		}
+	}
+
+	/** Everyone off, then down she goes. */
+	public void startSinking(ServerLevel level) {
+		state = State.SINKING;
+		stateTicks = 0;
+		speed = 0;
+		queue.clear();
+		for (Display.ItemDisplay seat : seats) seat.ejectPassengers();
+		waterY = y;
+		double best = Double.NEGATIVE_INFINITY;
+		int topY = (int) Math.floor(y);
+		for (float[] p : model().footprint) {
+			Vec3 w = toWorld(x, y, z, yaw, p[0], 0, p[1]);
+			for (int dy = 0; dy < 40; dy++) {
+				BlockPos bp = BlockPos.containing(w.x, topY - dy, w.z);
+				BlockState st = level.getBlockState(bp);
+				if (!st.getCollisionShape(level, bp).isEmpty()) {
+					best = Math.max(best, bp.getY() + st.getCollisionShape(level, bp).max(net.minecraft.core.Direction.Axis.Y));
+					break;
+				}
+			}
+		}
+		wreckY = best == Double.NEGATIVE_INFINITY ? waterY - 6 : Math.min(waterY, best + 1.0);
+		level.playSound(null, x, y, z, net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE, net.minecraft.sounds.SoundSource.BLOCKS, 1.5f, 0.5f);
+		ShipManager m = ShipManager.get();
+		if (m != null) m.markDirty();
+	}
+
+	/** True if open water above the wreck lets it rise again. */
+	public boolean canRaise(ServerLevel level) {
+		return fits(level, x, waterY, z, yaw);
+	}
+
+	/** Starts the rise to the surface. The caller has already checked the water and taken any payment. */
+	public void refloat(double hullFraction) {
+		state = State.AFLOAT;
+		hull = Math.max(1, maxHull() * hullFraction);
+		rising = 60;
+		stateTicks = 0;
+		speed = 0;
+		lastDamagedAt = Long.MIN_VALUE / 2;
 		ShipManager m = ShipManager.get();
 		if (m != null) m.markDirty();
 	}
@@ -266,6 +327,7 @@ public class Ship {
 		tillerButton = null;
 		cargoButton = null;
 		lastSentBob = Float.NaN;
+		appliedRoll = Float.NaN;
 	}
 
 	// ------------------------------------------------------------------ sailing
@@ -279,11 +341,20 @@ public class Ship {
 
 	public void tick(ServerLevel level) {
 		age++;
+		if (state == State.SINKING) {
+			tickSinking(level);
+			return;
+		}
+		if (state == State.WRECK) return;
+		if (rising > 0) {
+			tickRising();
+			return;
+		}
 		ServerPlayer captain = captain();
 		Input in = testInput != null ? testInput : (captain != null ? captain.getLastClientInput() : Input.EMPTY);
 		tickGuns(level, captain, in);
 
-		float max = type.maxSpeed;
+		float max = type.maxSpeed * (hullPercent() < 25 ? 0.6f : 1f);
 		if (in.forward() && !in.backward()) {
 			speed = Math.min(max, speed + type.acceleration);
 		} else if (in.backward() && !in.forward()) {
@@ -328,6 +399,10 @@ public class Ship {
 			captain.sendOverlayMessage(Component.literal(String.format("⚓ %s  |  Speed %.1f blocks/s  |  Hull %d%%  |  W/S sails, A/D steer%s, Shift to leave",
 					type.displayName, bps, hullPercent(), fire)).withStyle(ChatFormatting.GOLD));
 		}
+		if (age % 10 == 0 && hullPercent() < 50) {
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 2.0, z, 3, 0.5, 0.3, 0.5, 0.01);
+			if (hullPercent() < 25) level.sendParticles(ParticleTypes.FLAME, x, y + 1.5, z, 2, 0.6, 0.2, 0.6, 0.01);
+		}
 		if (age % 10 == 0) {
 			long now = level.getGameTime();
 			for (int side : new int[]{ShipModel.PORT, ShipModel.STARBOARD}) {
@@ -341,6 +416,44 @@ public class Ship {
 			}
 		}
 	}
+
+	private void tickSinking(ServerLevel level) {
+		stateTicks++;
+		double progress = Math.min(1.0, stateTicks / (double) SINK_TICKS);
+		y = waterY + (wreckY - waterY) * progress;
+		roll = (float) (SINK_ROLL * progress);
+		if (stateTicks % 4 == 0) {
+			level.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, x, waterY + 0.5, z, 6, type.halfBeam * 0.5, 0.3, type.length * 0.25, 0.05);
+		}
+		if (stateTicks % 25 == 0) {
+			level.playSound(null, x, waterY, z, net.minecraft.sounds.SoundEvents.GENERIC_SPLASH, net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 0.5f);
+		}
+		if (spawned) updateEntities(true);
+		if (stateTicks >= SINK_TICKS) {
+			state = State.WRECK;
+			wreckedAtGameTime = level.getGameTime();
+			y = wreckY;
+			roll = SINK_ROLL;
+			if (spawned) updateEntities(true);
+			ShipManager m = ShipManager.get();
+			if (m != null) m.markDirty();
+		}
+	}
+
+	private void tickRising() {
+		rising--;
+		double left = rising + 1;
+		y += (waterY - y) / left;
+		roll -= roll / (float) left;
+		if (rising == 0) {
+			y = waterY;
+			roll = 0;
+		}
+		if (spawned) updateEntities(true);
+	}
+
+	public static final int SINK_TICKS = 100;
+	public static final float SINK_ROLL = 18f;
 
 	private ServerPlayer gunner(int side) {
 		int idx = model().gunnerSeat(side);
@@ -393,16 +506,25 @@ public class Ship {
 		return a;
 	}
 
+	/** A point in ship coordinates, tilted by the current roll about the ship's long axis. */
+	private Vector3f rolled(Vector3f v) {
+		if (roll == 0) return v;
+		return new Vector3f(v).rotateZ((float) Math.toRadians(roll));
+	}
+
 	/** Moves every display/seat/button to follow the ship, with a gentle bob on the waves. */
 	private void updateEntities(boolean moved) {
-		float bob = (float) (Math.sin(age * 0.07) * 0.06);
+		float bob = state == State.AFLOAT && rising == 0 ? (float) (Math.sin(age * 0.07) * 0.06) : 0f;
 		if (!moved && Math.abs(bob - lastSentBob) < 0.01f) return;
 		lastSentBob = bob;
 		double by = y + bob;
 		for (Display.BlockDisplay d : parts) d.snapTo(x, by, z, yaw, 0f);
 		ShipModel m = model();
+		if (roll != appliedRoll && (Float.isNaN(appliedRoll) || age - lastRollSent >= 5 || roll == 0 || roll == SINK_ROLL)) {
+			applyRoll(m);
+		}
 		for (int i = 0; i < seats.size(); i++) {
-			Vector3f s = m.seats.get(i);
+			Vector3f s = rolled(m.seats.get(i));
 			Vec3 w = toWorld(x, by, z, yaw, s.x, s.y, s.z);
 			seats.get(i).snapTo(w.x, w.y, w.z, yaw, 0f);
 			if (i > 0 && i - 1 < seatButtons.size()) {
@@ -410,12 +532,29 @@ public class Ship {
 			}
 		}
 		if (tillerButton != null) {
-			Vec3 t = toWorld(x, by, z, yaw, m.tiller.x, m.tiller.y, m.tiller.z);
+			Vector3f tl = rolled(m.tiller);
+			Vec3 t = toWorld(x, by, z, yaw, tl.x, tl.y, tl.z);
 			tillerButton.snapTo(t.x, t.y - 0.3, t.z, 0f, 0f);
 		}
 		if (cargoButton != null) {
-			Vec3 c = toWorld(x, by, z, yaw, m.cargo.x, m.cargo.y, m.cargo.z);
+			Vector3f cg = rolled(m.cargo);
+			Vec3 c = toWorld(x, by, z, yaw, cg.x, cg.y, cg.z);
 			cargoButton.snapTo(c.x, c.y - 0.05, c.z, 0f, 0f);
+		}
+	}
+
+	/** Tilts every part about the long axis by re-sending its transformation (the client smooths it). */
+	private void applyRoll(ShipModel m) {
+		appliedRoll = roll;
+		lastRollSent = age;
+		Quaternionf q = new Quaternionf().rotateZ((float) Math.toRadians(roll));
+		for (int i = 0; i < parts.size() && i < m.parts.size(); i++) {
+			ShipModel.Part p = m.parts.get(i);
+			Vector3f t = new Vector3f(p.x(), p.y(), p.z()).rotate(q);
+			Display.BlockDisplay d = parts.get(i);
+			Compat.setTransformationInterpolationDelay(d, 0);
+			Compat.setTransformationInterpolationDuration(d, 5);
+			Compat.setTransformation(d, new Transformation(t, new Quaternionf(q), new Vector3f(p.sx(), p.sy(), p.sz()), new Quaternionf()));
 		}
 	}
 

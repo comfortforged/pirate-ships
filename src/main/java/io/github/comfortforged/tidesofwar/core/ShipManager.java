@@ -127,6 +127,16 @@ public final class ShipManager {
 				ship.despawn(this);
 			}
 		}
+		if (level.getGameTime() % 200 == 0 && Config.current.wrecks.lifetimeDays > 0) {
+			for (Ship s : new ArrayList<>(ships.values())) {
+				if (s.dimension.equals(dim) && Wrecks.expired(s, level.getGameTime())) {
+					Wrecks.spillCargo(level, s);
+					s.despawn(this);
+					ships.remove(s.id);
+					dirty = true;
+				}
+			}
+		}
 		for (Cannonball b : new ArrayList<>(balls)) {
 			if (b.level == level && !b.dead) b.tick(this);
 		}

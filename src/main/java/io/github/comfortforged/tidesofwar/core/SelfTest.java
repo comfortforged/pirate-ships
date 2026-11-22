@@ -178,6 +178,7 @@ final class SelfTest {
 			startCombat(level, m);
 		}
 		if (tick > COMBAT_START) combatStep(server, level, m, tick - COMBAT_START);
+		if (sinkBase > 0 && tick > sinkBase) sinkStep(server, level, m, tick - sinkBase);
 	}
 
 	// ------------------------------------------------------------------ cannons and ship combat
@@ -322,6 +323,81 @@ final class SelfTest {
 			m.packUp(gun);
 			ships.clear();
 			ships.add(gun);
+			startSinkTests(level, m);
+		}
+	}
+
+	// ------------------------------------------------------------------ sinking, wrecks, raising
+
+	private static int sinkBase;
+	private static Ship wreck;
+	private static double yBefore;
+	private static net.minecraft.world.entity.decoration.ArmorStand rider;
+	private static UUID wreckId;
+
+	private static void startSinkTests(ServerLevel level, ShipManager m) {
+		sinkBase = tick;
+		ships.clear();
+		wreck = new Ship(UUID.randomUUID(), ShipType.SLOOP, ShipManager.dimensionId(level), 30.5, Y + 1 - Ship.DRAFT, 10.5, 0f,
+				UUID.randomUUID(), "wreck");
+		wreck.hull = 1;
+		wreckId = wreck.id;
+		m.addShip(wreck);
+		ships.add(wreck);
+	}
+
+	private static void sinkStep(MinecraftServer server, ServerLevel level, ShipManager m, int t) {
+		if (t == 10) {
+			check(wreck.isSpawned(), "sinking test ship spawned");
+			rider = new net.minecraft.world.entity.decoration.ArmorStand(level, wreck.x, wreck.y + 1, wreck.z);
+			level.addFreshEntity(rider);
+			rider.startRiding(wreck.seats.get(1), true, true);
+			check(rider.getVehicle() != null, "rider is seated on the ship");
+			yBefore = wreck.y;
+			wreck.damage(level, 5);
+			check(wreck.state == Ship.State.SINKING && wreck.hull == 0, "zero hull starts the sinking");
+			check(rider.getVehicle() == null, "riders are thrown off a sinking ship");
+			check(Cannons.tryFire(level, wreck, ShipModel.PORT, null, -90f, 0f) == false, "a sinking ship can't fire");
+		}
+		if (t == 140) {
+			check(wreck.state == Ship.State.WRECK, "ship became a wreck");
+			check(wreck.y < yBefore - 0.3, "wreck lies lower (" + String.format("%.2f -> %.2f", yBefore, wreck.y) + ")");
+			check(wreck.roll > 10, "wreck is listing (roll " + wreck.roll + ")");
+			rider.discard();
+			// Not enough in hand: nothing is taken.
+			net.minecraft.world.SimpleContainer purse = new net.minecraft.world.SimpleContainer(9);
+			purse.setItem(0, new ItemStack(Items.OAK_PLANKS, 16));
+			check(!Wrecks.raise(level, wreck, purse, null), "raising without the full cost fails");
+			check(purse.getItem(0).getCount() == 16 && wreck.state == Ship.State.WRECK, "failed raise takes nothing");
+			// Save and load keep the wreck.
+			m.save();
+			wreck.despawn(m);
+			m.load();
+			wreck = m.ships().stream().filter(s -> s.id.equals(wreckId)).findFirst().orElse(null);
+			check(wreck != null, "wreck survives save/load");
+			if (wreck == null) {
+				finish(server);
+				return;
+			}
+			check(wreck.state == Ship.State.WRECK && wreck.roll > 10 && wreck.hull == 0, "wreck state, roll and hull survive save/load");
+			ships.clear();
+			ships.add(wreck);
+		}
+		if (t == 160) {
+			check(wreck.isSpawned(), "reloaded wreck spawned its visuals");
+			net.minecraft.world.SimpleContainer purse = new net.minecraft.world.SimpleContainer(9);
+			purse.setItem(0, new ItemStack(Items.OAK_PLANKS, 20));
+			purse.setItem(1, new ItemStack(Items.IRON_INGOT, 4));
+			check(Wrecks.raise(level, wreck, purse, null), "raising with the full cost works");
+			check(purse.getItem(0).getCount() == 4 && purse.getItem(1).isEmpty(), "raise consumed exactly the cost");
+			check(wreck.state == Ship.State.AFLOAT, "raised ship is afloat");
+			check(Math.abs(wreck.hull - wreck.maxHull() * Config.current.wrecks.raiseHullPercent / 100.0) < 0.01, "raised ship has the configured hull");
+		}
+		if (t == 240) {
+			check(Math.abs(wreck.y - wreck.waterY) < 0.01 && wreck.roll == 0, "raised ship is back on the surface, upright");
+			m.packUp(wreck);
+			ships.clear();
+			ships.add(wreck);
 			finish(server);
 		}
 	}
