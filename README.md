@@ -128,4 +128,4 @@ All Rights Reserved. See `LICENSE`.
 - Phase 2: more ship types and looks
 - Phase 3 (done in 0.2.0): cannons, hull damage, sinking and wrecks
 - Phase 4 (done in 0.3.0): upgrades for hull, sails, rudder and cannons, plus a Flight Core
-- Next: buying ships (economy) and more ship types
+- Next: more ship types and looks
