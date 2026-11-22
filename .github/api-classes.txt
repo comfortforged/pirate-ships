@@ -103,3 +103,10 @@ net.minecraft.tags.ItemTags
 net.minecraft.world.entity.player.Input
 net.minecraft.world.level.Level$ExplosionInteraction
 net.minecraft.world.entity.decoration.ArmorStand
+net.minecraft.world.entity.MoverType
+net.minecraft.server.network.ServerGamePacketListenerImpl
+net.minecraft.network.protocol.common.custom.CustomPacketPayload
+net.minecraft.network.codec.StreamCodec
+net.minecraft.network.RegistryFriendlyByteBuf
+net.minecraft.world.phys.AABB
+net.minecraft.world.phys.Vec3

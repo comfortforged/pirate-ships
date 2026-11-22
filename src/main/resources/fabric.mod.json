@@ -8,8 +8,10 @@
 	"license": "All Rights Reserved",
 	"environment": "*",
 	"entrypoints": {
-		"main": ["io.github.comfortforged.tidesofwar.platform.TidesOfWarFabric"]
+		"main": ["io.github.comfortforged.tidesofwar.platform.TidesOfWarFabric"],
+		"client": ["io.github.comfortforged.tidesofwar.platform.TidesOfWarFabricClient"]
 	},
+	"mixins": ["tidesofwar.mixins.json"],
 	"depends": {
 		"fabricloader": ">=0.19.5",
 		"minecraft": "${minecraft}",

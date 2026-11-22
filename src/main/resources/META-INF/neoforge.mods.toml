@@ -2,12 +2,15 @@ modLoader = "javafml"
 loaderVersion = "[1,)"
 license = "All Rights Reserved"
 
+[[mixins]]
+config = "tidesofwar.mixins.json"
+
 [[mods]]
 modId = "${id}"
 version = "${version}"
 displayName = "${name}"
 authors = "comfortforged"
-description = "Command the seas: summon huge sailable pirate ships with giant sails from your inventory. Server-side only; players don't need the mod."
+description = "Command the seas: summon huge sailable pirate ships with giant sails from your inventory. Runs on the server; players should install it too for walkable decks."
 
 [[dependencies.${id}]]
 modId = "neoforge"
