@@ -205,6 +205,7 @@ public final class ShipManager {
 			ship.cargo.setItem(i, cargo.get(i));
 		}
 		ship.hull = ShipItems.hullOf(stack, type);
+		ship.upgrades = ShipItems.upgradesOf(stack);
 		addShip(ship);
 		player.sendSystemMessage(Component.literal("Your " + type.displayName + " is launched! Right-click the tiller at the back to take the helm.")
 				.withStyle(ChatFormatting.GOLD));
@@ -224,7 +225,7 @@ public final class ShipManager {
 		}
 		ship.despawn(this);
 		ships.remove(ship.id);
-		ItemStack stack = ShipItems.create(ship.type, ship.hull);
+		ItemStack stack = ShipItems.create(ship.type, ship.hull, ship.upgrades);
 		List<ItemStack> items = new ArrayList<>();
 		for (int i = 0; i < ship.cargo.getContainerSize(); i++) items.add(ship.cargo.getItem(i).copy());
 		ShipItems.storeCargo(stack, items);
@@ -284,6 +285,9 @@ public final class ShipManager {
 			o.addProperty("roll", s.roll);
 			o.addProperty("wreckY", s.wreckY);
 			o.addProperty("waterY", s.waterY);
+			o.add("upgrades", s.upgrades.toJson());
+			o.addProperty("flying", s.flying);
+			o.addProperty("onGround", s.onGround);
 			if (s.owner != null) o.addProperty("owner", s.owner.toString());
 			if (s.ownerName != null) o.addProperty("ownerName", s.ownerName);
 			JsonArray cargo = new JsonArray();
@@ -350,6 +354,9 @@ public final class ShipManager {
 				if (o.has("roll")) s.roll = o.get("roll").getAsFloat();
 				if (o.has("wreckY")) s.wreckY = o.get("wreckY").getAsDouble();
 				if (o.has("waterY")) s.waterY = o.get("waterY").getAsDouble();
+				if (o.has("upgrades") && o.get("upgrades").isJsonObject()) s.upgrades = Upgrades.fromJson(o.getAsJsonObject("upgrades"));
+				if (o.has("flying")) s.flying = o.get("flying").getAsBoolean();
+				if (o.has("onGround")) s.onGround = o.get("onGround").getAsBoolean();
 				if (o.has("cargo")) {
 					for (JsonElement ce : o.getAsJsonArray("cargo")) {
 						JsonObject c = ce.getAsJsonObject();

@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "MPM",
+    "PMP",
+    "MPM"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "M": "minecraft:diamond"
+  },
+  "result": {
+    "id": "minecraft:prismarine_shard",
+    "count": 1,
+    "components": {
+      "minecraft:custom_data": {
+        "tidesofwar_upgrade": "hull",
+        "tidesofwar_tier": 2
+      },
+      "minecraft:item_name": {
+        "text": "Hull Plating II",
+        "color": "aqua"
+      },
+      "minecraft:enchantment_glint_override": true,
+      "minecraft:rarity": "rare",
+      "minecraft:lore": [
+        {
+          "text": "Right-click a ship's tiller to install",
+          "color": "gray",
+          "italic": false
+        },
+        {
+          "text": "Needs Hull Plating I installed first",
+          "color": "dark_gray",
+          "italic": false
+        }
+      ]
+    }
+  }
+}

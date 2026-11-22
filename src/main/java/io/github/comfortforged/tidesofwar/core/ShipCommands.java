@@ -17,6 +17,39 @@ import java.util.Collection;
 public final class ShipCommands {
 	private ShipCommands() {}
 
+	private static int giveUpgrade(com.mojang.brigadier.context.CommandContext<CommandSourceStack> c, int tier) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+		Upgrades.Part part = Upgrades.Part.byId(StringArgumentType.getString(c, "part"));
+		if (part == null) {
+			c.getSource().sendFailure(Component.literal("Unknown upgrade. Use: hull, sails, rudder, cannons, flight"));
+			return 0;
+		}
+		int t = Math.min(tier, part.maxTier);
+		Collection<ServerPlayer> targets = EntityArgument.getPlayers(c, "targets");
+		for (ServerPlayer p : targets) ShipInteractions.giveOrDrop(p, UpgradeItems.create(part, t));
+		c.getSource().sendSuccess(() -> Component.literal("Gave " + part.nameOfTier(t) + " to " + targets.size() + " player(s)"), true);
+		return targets.size();
+	}
+
+	/** The ship the player is riding, or else their nearest own ship. */
+	static Ship nearestOwned(ServerPlayer p) {
+		ShipManager m = ShipManager.get();
+		if (p.getVehicle() != null) {
+			Ship s = m.shipOfPart(p.getVehicle());
+			if (s != null) return s;
+		}
+		Ship best = null;
+		double bestDist = Double.MAX_VALUE;
+		for (Ship s : m.ships()) {
+			if (!p.getUUID().equals(s.owner) || !s.dimension.equals(ShipManager.dimensionId(p.level()))) continue;
+			double d = p.distanceToSqr(s.x, s.y, s.z);
+			if (d < bestDist) {
+				bestDist = d;
+				best = s;
+			}
+		}
+		return best;
+	}
+
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		String[] typeIds = Arrays.stream(ShipType.values()).map(ShipType::id).toArray(String[]::new);
 		LiteralCommandNode<CommandSourceStack> root = dispatcher.register(Commands.literal("tidesofwar")
@@ -36,7 +69,27 @@ public final class ShipCommands {
 											c.getSource().sendSuccess(() -> Component.literal("Gave a " + type.displayName + " to "
 													+ targets.size() + " player(s)"), true);
 											return targets.size();
-										}))))
+										}))
+								.then(Commands.literal("upgrade")
+										.then(Commands.argument("part", StringArgumentType.word())
+												.suggests((c, b) -> SharedSuggestionProvider.suggest(
+														Arrays.stream(Upgrades.Part.values()).map(pp -> pp.id), b))
+												.executes(c -> giveUpgrade(c, 1))
+												.then(Commands.argument("tier", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 3))
+														.executes(c -> giveUpgrade(c, com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "tier"))))))))
+				.then(Commands.literal("upgrades")
+						.executes(c -> {
+							ServerPlayer p = c.getSource().getPlayerOrException();
+							Ship s = nearestOwned(p);
+							if (s == null) {
+								c.getSource().sendFailure(Component.literal("You aren't on a ship and have none nearby."));
+								return 0;
+							}
+							var lines = s.upgrades.describe();
+							c.getSource().sendSuccess(() -> Component.literal(s.type.displayName + " upgrades: "
+									+ (lines.isEmpty() ? "none" : String.join(", ", lines))), false);
+							return lines.size();
+						}))
 				.then(Commands.literal("reload")
 						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 						.executes(c -> {
@@ -53,9 +106,9 @@ public final class ShipCommands {
 								return 0;
 							}
 							for (Ship s : m.ships()) {
-								c.getSource().sendSuccess(() -> Component.literal(String.format("%s owned by %s at %d %d %d (%s), hull %d%%, %s",
+								c.getSource().sendSuccess(() -> Component.literal(String.format("%s owned by %s at %d %d %d (%s), hull %d%%, %s, %s",
 										s.type.displayName, s.ownerName, (int) s.x, (int) s.y, (int) s.z, s.dimension,
-										s.hullPercent(), s.state.name().toLowerCase())), false);
+										s.hullPercent(), s.state.name().toLowerCase(), s.upgrades.summary())), false);
 							}
 							return m.ships().size();
 						}))

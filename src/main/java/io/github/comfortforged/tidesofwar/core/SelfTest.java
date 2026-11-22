@@ -60,7 +60,11 @@ final class SelfTest {
 
 		ShipManager m = ShipManager.get();
 		check(m != null, "ship manager started");
-		for (String r : new String[]{"pirate_sloop", "pirate_brigantine", "pirate_galleon"}) {
+		java.util.List<String> recipes = new ArrayList<>(List.of("pirate_sloop", "pirate_brigantine", "pirate_galleon", "upgrade_flight_1"));
+		for (String part : new String[]{"hull", "sails", "rudder", "cannons"}) {
+			for (int t = 1; t <= 3; t++) recipes.add("upgrade_" + part + "_" + t);
+		}
+		for (String r : recipes) {
 			var key = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,
 					net.minecraft.resources.Identifier.fromNamespaceAndPath(TidesOfWar.MOD_ID, r));
 			check(server.getRecipeManager().byKey(key).isPresent(), "recipe " + r + " loaded");
@@ -175,6 +179,7 @@ final class SelfTest {
 			check(probe.inCombat(now + 20), "ship is in combat just after a hit");
 			check(!probe.inCombat(now + Config.current.hull.combatLockSeconds * 20L + 1), "combat lock expires");
 
+			checkUpgradeData(m);
 			startCombat(level, m);
 		}
 		if (tick > COMBAT_START) combatStep(server, level, m, tick - COMBAT_START);
@@ -441,6 +446,7 @@ final class SelfTest {
 			check(m.ships().size() == 1 && m.ships().iterator().next().id.toString().equals(id), "old pirateships/ships.json loaded");
 			Ship oldShip = m.ships().iterator().next();
 			check(oldShip.state == Ship.State.AFLOAT && oldShip.hull == oldShip.maxHull(), "old ship loads afloat with a full hull");
+			check(oldShip.upgrades.isStock() && !oldShip.flying, "old ship loads with no upgrades");
 			check(java.nio.file.Files.exists(current), "old ships migrated to tidesofwar/ships.json");
 			java.nio.file.Files.deleteIfExists(legacy);
 			java.nio.file.Files.deleteIfExists(current);
@@ -448,6 +454,33 @@ final class SelfTest {
 		} catch (java.io.IOException e) {
 			check(false, "legacy data check threw " + e);
 		}
+	}
+
+	/** Upgrade items, saving and the packed item (phase 4 data). */
+	private static void checkUpgradeData(ShipManager m) {
+		for (Upgrades.Part part : Upgrades.Part.values()) {
+			ItemStack it = UpgradeItems.create(part, part.maxTier);
+			check(UpgradeItems.partOf(it) == part && UpgradeItems.tierOf(it) == part.maxTier, "upgrade item round trip: " + part.id);
+			check(it.is(part.baseItem()), "upgrade item for " + part.id + " is built on " + part.baseItem());
+		}
+		check(UpgradeItems.partOf(new ItemStack(Items.PAPER)) == null, "plain paper is not an upgrade");
+		check(UpgradeItems.partOf(ShipItems.create(ShipType.SLOOP)) == null, "a ship item is not an upgrade");
+
+		Ship s = new Ship(UUID.randomUUID(), ShipType.BRIGANTINE, "minecraft:overworld", 0.5, 64, 0.5, 0f, null, "up");
+		s.upgrades.set(Upgrades.Part.HULL, 2);
+		s.upgrades.set(Upgrades.Part.SAILS, 3);
+		s.upgrades.set(Upgrades.Part.FLIGHT, 1);
+		s.flying = true;
+		m.addShip(s);
+		m.load();
+		Ship r = m.ships().stream().filter(x -> x.id.equals(s.id)).findFirst().orElse(null);
+		check(r != null && r.upgrades.sameAs(s.upgrades) && r.flying && !r.onGround, "upgrades and flight state survive save/load (" + (r == null ? "?" : r.upgrades.summary()) + ")");
+		if (r != null) {
+			ItemStack item = m.packUp(r);
+			check(ShipItems.upgradesOf(item).sameAs(s.upgrades), "packed item keeps the upgrades");
+			check(ShipItems.upgradesOf(ShipItems.create(ShipType.SLOOP)).isStock(), "fresh ship item has no upgrades");
+		}
+		for (Ship left : new ArrayList<>(m.ships())) m.packUp(left);
 	}
 
 	private static int countParts(ServerLevel level, Ship ship) {

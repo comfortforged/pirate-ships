@@ -50,6 +50,11 @@ public class Ship {
 
 	public enum State { AFLOAT, SINKING, WRECK }
 
+	public Upgrades upgrades = new Upgrades();
+	/** Flight (needs a flight core): in the air, or resting on land. */
+	public boolean flying;
+	public boolean onGround;
+
 	public double hull;
 	public State state = State.AFLOAT;
 	public int stateTicks;

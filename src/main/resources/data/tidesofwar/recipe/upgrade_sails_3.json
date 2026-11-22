@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WWW",
+    "WMW",
+    "WWW"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "M": "minecraft:netherite_ingot"
+  },
+  "result": {
+    "id": "minecraft:paper",
+    "count": 1,
+    "components": {
+      "minecraft:custom_data": {
+        "tidesofwar_upgrade": "sails",
+        "tidesofwar_tier": 3
+      },
+      "minecraft:item_name": {
+        "text": "Sails III",
+        "color": "aqua"
+      },
+      "minecraft:enchantment_glint_override": true,
+      "minecraft:rarity": "epic",
+      "minecraft:lore": [
+        {
+          "text": "Right-click a ship's tiller to install",
+          "color": "gray",
+          "italic": false
+        },
+        {
+          "text": "Needs Sails II installed first",
+          "color": "dark_gray",
+          "italic": false
+        }
+      ]
+    }
+  }
+}

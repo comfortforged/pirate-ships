@@ -27,11 +27,16 @@ public final class ShipItems {
 	}
 
 	public static ItemStack create(ShipType type, double hull) {
+		return create(type, hull, new Upgrades());
+	}
+
+	public static ItemStack create(ShipType type, double hull, Upgrades upgrades) {
 		ItemStack stack = new ItemStack(Items.DARK_OAK_BOAT);
 		CompoundTag tag = new CompoundTag();
 		tag.putString(TYPE_KEY, type.id());
 		double max = Config.current.maxHull(type);
 		if (hull < max) tag.putFloat(HULL_KEY, (float) hull);
+		upgrades.toTag(tag);
 		stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		stack.set(net.minecraft.core.component.DataComponents.ITEM_NAME,
 				Component.literal(type.displayName).withStyle(ChatFormatting.GOLD));
@@ -44,8 +49,17 @@ public final class ShipItems {
 		if (hull < max) {
 			lore.add(Component.literal("Hull " + Math.round(100.0 * hull / max) + "%").withStyle(ChatFormatting.RED));
 		}
+		for (String line : upgrades.describe()) {
+			lore.add(Component.literal(line).withStyle(ChatFormatting.AQUA));
+		}
 		stack.set(net.minecraft.core.component.DataComponents.LORE, new ItemLore(lore));
 		return stack;
+	}
+
+	/** The upgrades stored on a ship item (none for a plain one). */
+	public static Upgrades upgradesOf(ItemStack stack) {
+		CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+		return data == null ? new Upgrades() : Upgrades.fromTag(data.copyTag());
 	}
 
 	/** Returns the ship type this item summons, or null if it isn't a ship item. */
