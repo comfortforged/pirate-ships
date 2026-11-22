@@ -184,6 +184,7 @@ final class SelfTest {
 					level, -60.5, Y + 20, 60.5, new ItemStack(Items.STONE));
 			probeStand.move(net.minecraft.world.entity.MoverType.SELF, new net.minecraft.world.phys.Vec3(0, -0.1, 0));
 			check(ShipHooks.collideMixinRan, "the collision mixin is applied");
+			checkCollisionMath();
 			startCombat(level, m);
 		}
 		if (tick > COMBAT_START) combatStep(server, level, m, tick - COMBAT_START);
@@ -636,6 +637,59 @@ final class SelfTest {
 	}
 
 	/** Upgrade items, saving and the packed item (phase 4 data). */
+	private static void checkCollisionMath() {
+		for (ShipType type : ShipType.values()) {
+			var boxes = ShipCollision.of(type);
+			double stern = -type.length / 2.0;
+			double w = ShipModel.halfWidthAt(type, type.length / 2);
+			double zMid = stern + type.length * 0.5 + 0.5;
+			check(!boxes.isEmpty(), type + ": has collision boxes (" + boxes.size() + ")");
+			check(Math.abs(ShipCollision.topAt(boxes, 0, zMid + 3.7) - ShipCollision.DECK_TOP) < 1e-6
+							|| Math.abs(ShipCollision.topAt(boxes, 0.5, stern + type.length * 0.45) - ShipCollision.DECK_TOP) < 1e-6,
+					type + ": the main deck is at deck height");
+			check(Math.abs(ShipCollision.topAt(boxes, w - 0.2, zMid) - ShipCollision.RAIL_TOP) < 1e-6, type + ": the rail reaches rail height");
+			check(Math.abs(ShipCollision.topAt(boxes, 0, stern + 1.0) - ShipCollision.CASTLE_TOP) < 1e-6, type + ": the stern deck is raised");
+			float[] mast = type.masts[0];
+			check(Math.abs(ShipCollision.topAt(boxes, 0, stern + mast[0] * type.length) - mast[1]) < 1e-6, type + ": the mast is solid up to its top");
+		}
+		// round trips
+		for (float yaw : new float[]{0f, 90f, 37f, -123f}) {
+			ShipFrame.Pose p = new ShipFrame.Pose(10.5, 100, -4.25, yaw);
+			net.minecraft.world.phys.Vec3 w = ShipFrame.toWorld(p, 1.25, 0.5, -3.0);
+			net.minecraft.world.phys.Vec3 l = ShipFrame.toLocal(p, w);
+			check(Math.abs(l.x - 1.25) < 1e-9 && Math.abs(l.y - 0.5) < 1e-9 && Math.abs(l.z + 3.0) < 1e-9, "local/world round trip at yaw " + yaw);
+			net.minecraft.world.phys.Vec3 d = new net.minecraft.world.phys.Vec3(0.3, -0.1, 0.7);
+			net.minecraft.world.phys.Vec3 back = ShipFrame.dirToWorld(yaw, ShipFrame.dirToLocal(yaw, d));
+			check(back.distanceTo(d) < 1e-9, "direction round trip at yaw " + yaw);
+		}
+		// walking on a sloop
+		var sloop = ShipCollision.of(ShipType.SLOOP);
+		double halfW = ShipModel.halfWidthAt(ShipType.SLOOP, 5);
+		for (float yaw : new float[]{0f, 37f, 90f}) {
+			ShipFrame.Pose p = new ShipFrame.Pose(5, 100, 5, yaw);
+			net.minecraft.world.phys.Vec3 feet = ShipFrame.toWorld(p, 0, ShipCollision.DECK_TOP + 0.5, 0.5);
+			net.minecraft.world.phys.AABB body = new net.minecraft.world.phys.AABB(feet.x - 0.3, feet.y, feet.z - 0.3, feet.x + 0.3, feet.y + 1.8, feet.z + 0.3);
+			net.minecraft.world.phys.Vec3 drop = ShipFrame.clip(sloop, p, body, new net.minecraft.world.phys.Vec3(0, -2, 0), 0);
+			check(Math.abs(drop.y + 0.5) < 1e-6, "a falling body lands on the deck at yaw " + yaw + " (" + String.format("%.3f", drop.y) + ")");
+			// stand on the deck, shove toward port (+x local): stopped by the rail
+			net.minecraft.world.phys.Vec3 standing = ShipFrame.toWorld(p, 0, ShipCollision.DECK_TOP, 0.5);
+			net.minecraft.world.phys.AABB onDeck = new net.minecraft.world.phys.AABB(standing.x - 0.3, standing.y, standing.z - 0.3, standing.x + 0.3, standing.y + 1.8, standing.z + 0.3);
+			net.minecraft.world.phys.Vec3 push = ShipFrame.dirToWorld(yaw, new net.minecraft.world.phys.Vec3(10, 0, 0));
+			net.minecraft.world.phys.Vec3 got = ShipFrame.dirToLocal(yaw, ShipFrame.clip(sloop, p, onDeck, push, 0));
+			double expect = halfW - 0.4 - 0.3;
+			check(Math.abs(got.x - expect) < 1e-6 && Math.abs(got.z) < 1e-6, "the rail stops sideways movement at yaw " + yaw + " (" + String.format("%.3f vs %.3f", got.x, expect) + ")");
+		}
+		// stepping up to the stern deck
+		ShipFrame.Pose p0 = new ShipFrame.Pose(0, 100, 0, 0f);
+		double zc = -ShipType.SLOOP.length / 2.0 + ShipCollision.castleLength(ShipType.SLOOP);
+		net.minecraft.world.phys.Vec3 f = ShipFrame.toWorld(p0, 0, ShipCollision.DECK_TOP, zc + 1.0 + 0.3 + 0.01);
+		net.minecraft.world.phys.AABB walker = new net.minecraft.world.phys.AABB(f.x - 0.3, f.y, f.z - 0.3, f.x + 0.3, f.y + 1.8, f.z + 0.3);
+		net.minecraft.world.phys.Vec3 stepped = ShipFrame.clip(sloop, p0, walker, new net.minecraft.world.phys.Vec3(0, -0.08, -0.3), 0.6);
+		check(stepped.y > 0.45 && stepped.z < -0.25, "walking into the first step climbs it (" + String.format("%.2f, %.2f", stepped.y, stepped.z) + ")");
+		net.minecraft.world.phys.Vec3 flat = ShipFrame.clip(sloop, p0, walker, new net.minecraft.world.phys.Vec3(0, -0.08, -0.3), 0);
+		check(Math.abs(flat.z) < 0.02, "without step height the step blocks (" + String.format("%.2f", flat.z) + ")");
+	}
+
 	private static void checkUpgradeData(ShipManager m) {
 		for (Upgrades.Part part : Upgrades.Part.values()) {
 			ItemStack it = UpgradeItems.create(part, part.maxTier);
