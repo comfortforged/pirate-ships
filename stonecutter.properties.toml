@@ -1,7 +1,7 @@
 mod.id = "tidesofwar"
 mod.name = "Tides of War"
 mod.group = "io.github.comfortforged"
-mod.version = "0.1.0"
+mod.version = "0.2.0"
 
 deps.fabric_loader = "0.20.1"
 loomx.loom_version = "1.19-SNAPSHOT"
