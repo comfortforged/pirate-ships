@@ -1,0 +1,409 @@
+Running Stonecutter 0.10
+
+> Configure project :26.1-fabric
+Fabric Loom: 1.19.4
+
+> Configure project :26.1-forge
+Minecraft Maven is up-to-date, took 0:00.574
+
+> Configure project :26.1-neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Configure project :26.2-fabric
+Fabric Loom: 1.19.4
+
+> Configure project :26.2-forge
+Minecraft Maven is up-to-date, took 0:00.546
+
+> Configure project :26.2-neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Configure project :26.3-fabric
+Fabric Loom: 1.19.4
+
+> Configure project :26.3-forge
+Minecraft Maven is up-to-date, took 0:00.587
+
+> Configure project :26.3-neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Task :26.1-forge:stonecutterGenerate UP-TO-DATE
+> Task :26.1-forge:compileJava UP-TO-DATE
+> Task :26.1-forge:processResources UP-TO-DATE
+> Task :26.1-forge:classes UP-TO-DATE
+> Task :26.1-forge:slimeLauncherMetadataForForge
+
+> Task :26.1-forge:runServer
+Slime Launcher setup is up-to-date, took 156ms
+Launching using main class: net.minecraftforge.bootstrap.ForgeBootstrap
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by net.minecraftforge.unsafe.UnsafeHacks (file:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/unsafe/0.9.2/33bad02861cabd77c54a8c9d1205e8638bbbbb4f/unsafe-0.9.2.jar)
+WARNING: Please consider reporting this to the maintainers of class net.minecraftforge.unsafe.UnsafeHacks
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by com.sun.jna.Native in module com.sun.jna (jar:file:///home/runner/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna/5.17.0/33d12735bef894440780fce64f9758d420c7bae2/jna-5.17.0.jar!/)
+WARNING: Use --enable-native-access=com.sun.jna to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.jline.nativ.JLineNativeLoader in module org.jline.nativ (jar:file:///home/runner/.gradle/caches/modules-2/files-2.1/org.jline/jline-native/3.25.1/7f58e474f7d94db5bf87b1fddf4fa646475779f2/jline-native-3.25.1.jar!/)
+WARNING: Use --enable-native-access=org.jline.nativ to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2026-11-23T03:14:09.139315796Z main WARN Advanced terminal features are not available in this environment
+[03:14:09] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--gameDir, ., --launchTarget, forge_userdev_server, --nogui, --mixin.config, tidesofwar.mixins.json]
+[03:14:09] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Microsoft OpenJDK 64-Bit Server VM 25.0.5.0.2+1-LTS
+[03:14:09] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 10.2.6 starting: java version 25.0.5.0.2 by Microsoft; OS Linux arch amd64 version 7.0.0-1014-aws
+[03:14:09] [main/WARN] [ne.mi.fm.lo.FMLConfig/CORE]: Configuration file /home/runner/work/pirate-ships/pirate-ships/run/config/fml.toml is not correct. Correcting
+[03:14:09] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowSkipGLVersions] was corrected from null to []
+[03:14:09] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowLogHelpMessage] was corrected from null to true
+[03:14:09] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowSquir] was corrected from null to false
+[03:14:09] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowShowCPU] was corrected from null to false
+[03:14:09] [main/INFO] [ne.mi.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forge_userdev_server
+[03:14:09] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=jar:file:///home/runner/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.7/8ab114ac385e6dbdad5efafe28aba4df8120915f/mixin-0.8.7.jar!/ Service=ModLauncher Env=SERVER
+[03:14:10] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/JAR-JAR]: JarJar Candidated for com.github.LlamaLad7:MixinExtras
+[03:14:10] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/JAR-JAR]: 	*mixinextras-forge-0.5.4.jar!/META-INF/jars/MixinExtras-0.5.4.jar
+[03:14:10] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/JAR-JAR]: JarJar Candidated for io.github.llamalad7:mixinextras-forge
+[03:14:10] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/JAR-JAR]: 	*mixinextras-forge-0.5.4.jar
+[03:14:10] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/JAR-JAR]: Found 2 dependencies adding them to mods collection
+[03:14:10] [main/INFO] [mixin/]: Compatibility level set to JAVA_21
+[03:14:10] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forge_userdev_server' with arguments [--gameDir, ., --nogui]
+[03:14:11] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.4).
+[03:14:14] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 64.1.6, for MC 26.1.2 with MCP 20260409.101008
+[03:14:14] [modloading-worker-0/INFO] [ne.mi.co.MinecraftForge/FORGE]: MinecraftForge v64.1.6 Initialized
+[03:14:14] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Opening jdk.naming.dns/com.sun.jndi.dns to java.naming
+[03:14:14] [modloading-worker-0/INFO] [tidesofwar/]: Tides of War ready: 3 ship types
+[03:14:14] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/pirate-ships/pirate-ships/run/config/forge-common.toml is not correct. Correcting
+[03:14:14] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key general was corrected from null to its default, SynchronizedConfig{DataHolder:{}}. 
+[03:14:14] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key general.logLegacyTagWarnings was corrected from null to its default, OFF. 
+[03:14:14] [main/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key general.channelListLimit was corrected from null to its default, 1024. 
+[03:14:14] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[03:14:15] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Found status: AHEAD Current: 64.1.6 Target: null
+[03:14:15] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, profilesHost=https://api.mojang.com, name=PROD]
+[03:14:15] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/home/runner/work/pirate-ships/pirate-ships/.gradle/mavenizer/repo/net/minecraftforge/forge/26.1.2-64.1.6/forge-26.1.2-64.1.6.jar%230!/assets/.mcassetsroot' uses unexpected schema
+[03:14:15] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/home/runner/work/pirate-ships/pirate-ships/.gradle/mavenizer/repo/net/minecraftforge/forge/26.1.2-64.1.6/forge-26.1.2-64.1.6.jar%230!/data/.mcassetsroot' uses unexpected schema
+[03:14:15] [Worker-Main-1/INFO] [minecraft/Main]: No existing world data, creating new world
+[03:14:15] [Worker-Main-1/ERROR] [minecraft/DedicatedServerProperties]: No key layers in MapLike[{}]
+[03:14:16] [main/INFO] [minecraft/RecipeManager]: Loaded 1531 recipes
+[03:14:16] [main/INFO] [minecraft/AdvancementTree]: Loaded 1617 advancements
+[03:14:16] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 26.1.2
+[03:14:16] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+[03:14:16] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: SURVIVAL
+[03:14:16] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[03:14:16] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25565
+2026-11-23T03:14:16.745445368Z Server thread ERROR An exception occurred processing Appender DebugFile
+org.apache.logging.log4j.core.appender.AppenderLoggingException: java.lang.NoClassDefFoundError: Could not initialize class io.netty.channel.kqueue.Native
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.config.AppenderControl.tryCallAppender(AppenderControl.java:164)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.config.AppenderControl.callAppender0(AppenderControl.java:133)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.config.AppenderControl.callAppenderPreventRecursion(AppenderControl.java:124)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.config.AppenderControl.callAppender(AppenderControl.java:88)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.config.LoggerConfig.callAppenders(LoggerConfig.java:711)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.config.LoggerConfig.processLogEvent(LoggerConfig.java:669)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.config.LoggerConfig.log(LoggerConfig.java:645)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.config.LoggerConfig.log(LoggerConfig.java:554)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.config.AwaitCompletionReliabilityStrategy.log(AwaitCompletionReliabilityStrategy.java:67)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.Logger.logMessage(Logger.java:173)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.slf4j2.impl@2.25.2/org.apache.logging.slf4j.Log4jLogger.log(Log4jLogger.java:374)
+	at SECURE-BOOTSTRAP/io.netty.common@4.2.7.Final/io.netty.util.internal.logging.LocationAwareSlf4JLogger.log(LocationAwareSlf4JLogger.java:46)
+	at SECURE-BOOTSTRAP/io.netty.common@4.2.7.Final/io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:129)
+	at SECURE-BOOTSTRAP/io.netty.transport.classes.kqueue@4.2.7.Final/io.netty.channel.kqueue.KQueue.<clinit>(KQueue.java:54)
+	at TRANSFORMER/minecraft@26.1.2/net.minecraft.server.network.EventLoopGroupHolder.remote(EventLoopGroupHolder.java:59)
+	at TRANSFORMER/minecraft@26.1.2/net.minecraft.server.network.ServerConnectionListener.startTcpServerListener(ServerConnectionListener.java:57)
+	at TRANSFORMER/minecraft@26.1.2/net.minecraft.server.dedicated.DedicatedServer.initServer(DedicatedServer.java:261)
+	at TRANSFORMER/minecraft@26.1.2/net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:738)
+	at TRANSFORMER/minecraft@26.1.2/net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:300)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+Caused by: java.lang.NoClassDefFoundError: Could not initialize class io.netty.channel.kqueue.Native
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:547)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j@2.25.2/org.apache.logging.log4j.util.LoaderUtil.loadClass(LoaderUtil.java:212)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.pattern.ThrowableExtendedStackTraceRenderer.lambda$static$1(ThrowableExtendedStackTraceRenderer.java:196)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.pattern.ThrowableExtendedStackTraceRenderer$ExtendedContext.loadClass(ThrowableExtendedStackTraceRenderer.java:180)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.pattern.ThrowableExtendedStackTraceRenderer$ExtendedContext.createClassResourceInfoByName(ThrowableExtendedStackTraceRenderer.java:166)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.pattern.ThrowableExtendedStackTraceRenderer$ExtendedContext.ofThrowable(ThrowableExtendedStackTraceRenderer.java:96)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.pattern.ThrowableExtendedStackTraceRenderer$ExtendedContext.access$000(ThrowableExtendedStackTraceRenderer.java:81)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.pattern.ThrowableExtendedStackTraceRenderer.createContext(ThrowableExtendedStackTraceRenderer.java:43)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.pattern.ThrowableExtendedStackTraceRenderer.createContext(ThrowableExtendedStackTraceRenderer.java:34)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.pattern.ThrowableStackTraceRenderer.renderThrowable(ThrowableStackTraceRenderer.java:55)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.pattern.ThrowablePatternConverter.format(ThrowablePatternConverter.java:130)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.layout.PatternLayout$NoFormatPatternSerializer.toSerializable(PatternLayout.java:354)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.layout.PatternLayout.toText(PatternLayout.java:251)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.layout.PatternLayout.encode(PatternLayout.java:237)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.layout.PatternLayout.encode(PatternLayout.java:57)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.appender.AbstractOutputStreamAppender.directEncodeEvent(AbstractOutputStreamAppender.java:227)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.appender.AbstractOutputStreamAppender.tryAppend(AbstractOutputStreamAppender.java:220)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.appender.AbstractOutputStreamAppender.append(AbstractOutputStreamAppender.java:211)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender.append(RollingRandomAccessFileAppender.java:275)
+	at SECURE-BOOTSTRAP/org.apache.logging.log4j.core@2.25.2/org.apache.logging.log4j.core.config.AppenderControl.tryCallAppender(AppenderControl.java:160)
+	... 19 more
+Caused by: java.lang.ExceptionInInitializerError: Exception java.lang.IllegalStateException: Only supported on OSX/BSD [in thread "Server thread"]
+	at SECURE-BOOTSTRAP/io.netty.transport.classes.kqueue@4.2.7.Final/io.netty.channel.kqueue.Native.loadNativeLibrary(Native.java:159)
+	at SECURE-BOOTSTRAP/io.netty.transport.classes.kqueue@4.2.7.Final/io.netty.channel.kqueue.Native.<clinit>(Native.java:76)
+	at SECURE-BOOTSTRAP/io.netty.transport.classes.kqueue@4.2.7.Final/io.netty.channel.kqueue.KQueue.<clinit>(KQueue.java:38)
+	... 6 more
+
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by io.netty.util.internal.NativeLibraryUtil in module io.netty.common (jar:file:///home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-common/4.2.7.Final/11aa30df26af4fca3239ac1917f303a280f301e1/netty-common-4.2.7.Final.jar!/)
+WARNING: Use --enable-native-access=io.netty.common to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+[03:14:16] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[03:14:16] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[03:14:16] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[03:14:16] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[03:14:16] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file ./world/serverconfig/forge-server.toml is not correct. Correcting
+[03:14:16] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server was corrected from null to its default, SynchronizedConfig{DataHolder:{}}. 
+[03:14:16] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringBlockEntities was corrected from null to its default, false. 
+[03:14:16] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringEntities was corrected from null to its default, false. 
+[03:14:16] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.fullBoundingBoxLadders was corrected from null to its default, false. 
+[03:14:16] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.permissionHandler was corrected from null to its default, forge:default_handler. 
+[03:14:16] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.advertiseDedicatedServerToLan was corrected from null to its default, true. 
+[03:14:16] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+[03:14:17] [Server thread/INFO] [minecraft/LoggingLevelLoadListener]: Selecting global world spawn...
+[03:14:17] [Server thread/INFO] [minecraft/LoggingLevelLoadListener]: Loading 0 persistent chunks...
+[03:14:17] [Server thread/INFO] [minecraft/LoggingLevelLoadListener]: Preparing spawn area: 100%
+[03:14:17] [Server thread/INFO] [minecraft/LoggingLevelLoadListener]: Time elapsed: 293 ms
+[03:14:17] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.454s)! For help, type "help"
+[03:14:17] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[03:14:17] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[03:14:17] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[03:14:17] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[03:14:17] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[03:14:17] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[03:14:17] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[03:14:17] [Server thread/INFO] [ne.mi.se.pe.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   ship manager started
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe pirate_sloop loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe pirate_brigantine loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe pirate_galleon loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_flight_1 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_hull_1 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_hull_2 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_hull_3 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_sails_1 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_sails_2 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_sails_3 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_rudder_1 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_rudder_2 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_rudder_3 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_cannons_1 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_cannons_2 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   recipe upgrade_cannons_3 loaded
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop fits in open water
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine fits in open water
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon fits in open water
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST launched 3 ships
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop spawned its visuals
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop has 61+ part entities
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop has 2 cannons
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop has helm, benches and two gunner seats
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop gunner seats come after the benches
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine spawned its visuals
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine has 93+ part entities
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine has 6 cannons
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine has helm, benches and two gunner seats
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine gunner seats come after the benches
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon spawned its visuals
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon has 128+ part entities
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon has 10 cannons
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon has helm, benches and two gunner seats
+[03:14:18] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon gunner seats come after the benches
+[03:14:21] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop is picking up speed (0.358)
+[03:14:21] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine is picking up speed (0.247)
+[03:14:21] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon is picking up speed (0.165)
+[03:14:28] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop sailed forward (z -10.5 -> 39.2)
+[03:14:28] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine sailed forward (z -10.5 -> 36.7)
+[03:14:28] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon sailed forward (z -10.5 -> 32.6)
+[03:15:33] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop did not sail through the wall (bow at 44.7)
+[03:15:33] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop reached the wall
+[03:15:33] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine did not sail through the wall (bow at 44.7)
+[03:15:33] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine reached the wall
+[03:15:33] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon did not sail through the wall (bow at 44.7)
+[03:15:33] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon reached the wall
+[03:15:36] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop turned (yaw 0.0 -> -114.545006)
+[03:15:38] [Server thread/INFO] [tidesofwar/]: Loaded 3 ship(s)
+[03:15:38] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   save/load keeps all 3 ships
+[03:15:38] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   cargo survives save/load
+[03:15:38] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   hull survives save/load
+[03:15:40] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sloop respawned after reload
+[03:15:40] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   brigantine respawned after reload
+[03:15:40] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   galleon respawned after reload
+[03:15:40] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   packed galleon item knows its type
+[03:15:40] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   packed item keeps the hull
+[03:15:40] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   fresh item has full hull
+[03:15:40] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   packed item keeps the cargo
+[03:15:40] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   packing removes the ship's entities
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   no ship entities left over (0)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   ship item round trip
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   plain boats are not ships
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   old pirateships_type item still recognised
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   old pirateships_part tag still recognised as a leftover
+[03:15:41] [Server thread/INFO] [tidesofwar/]: Loaded 1 ship(s)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: Migrated ships from ./world/./pirateships/ships.json to ./world/./tidesofwar/ships.json
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   old pirateships/ships.json loaded
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   old ship loads afloat with a full hull
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   old ship loads with no upgrades
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   old ships migrated to tidesofwar/ships.json
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   fresh ship is not in combat
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   ship is in combat just after a hit
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   combat lock expires
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrade item round trip: hull
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrade item for hull is built on minecraft:prismarine_shard
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrade item round trip: sails
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrade item for sails is built on minecraft:paper
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrade item round trip: rudder
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrade item for rudder is built on minecraft:prismarine_crystals
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrade item round trip: cannons
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrade item for cannons is built on minecraft:flint
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrade item round trip: flight
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrade item for flight is built on minecraft:heart_of_the_sea
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   plain paper is not an upgrade
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a ship item is not an upgrade
+[03:15:41] [Server thread/INFO] [tidesofwar/]: Loaded 1 ship(s)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrades and flight state survive save/load (H2 S3 R0 C0 F)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   packed item keeps the upgrades
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   fresh ship item has no upgrades
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   the collision mixin is applied
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   SLOOP: has collision boxes (24)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   SLOOP: the main deck is at deck height
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   SLOOP: the rail reaches rail height
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   SLOOP: the stern deck is raised
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   SLOOP: the mast is solid up to its top
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   BRIGANTINE: has collision boxes (31)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   BRIGANTINE: the main deck is at deck height
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   BRIGANTINE: the rail reaches rail height
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   BRIGANTINE: the stern deck is raised
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   BRIGANTINE: the mast is solid up to its top
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   GALLEON: has collision boxes (41)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   GALLEON: the main deck is at deck height
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   GALLEON: the rail reaches rail height
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   GALLEON: the stern deck is raised
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   GALLEON: the mast is solid up to its top
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   local/world round trip at yaw 0.0
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   direction round trip at yaw 0.0
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   local/world round trip at yaw 90.0
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   direction round trip at yaw 90.0
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   local/world round trip at yaw 37.0
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   direction round trip at yaw 37.0
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   local/world round trip at yaw -123.0
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   direction round trip at yaw -123.0
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a falling body lands on the deck at yaw 0.0 (-0.500)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   the rail stops sideways movement at yaw 0.0 (1.300 vs 1.300)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a falling body lands on the deck at yaw 37.0 (-0.500)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   the rail stops sideways movement at yaw 37.0 (1.300 vs 1.300)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a falling body lands on the deck at yaw 90.0 (-0.500)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   the rail stops sideways movement at yaw 90.0 (1.300 vs 1.300)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   walking into the first step climbs it (0.50, -0.30)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   without step height the step blocks (-0.01)
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   combat ships fit in the pool
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   combat ships spawned
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   no ammo: nothing fires
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   broadside fires with ammo
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   broadside queues 3 cannons
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   broadside used one gunpowder per cannon
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   second broadside is refused while reloading
+[03:15:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   refused broadside used no ammo
+[03:15:45] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   broadside hurt the target ship (hull 160.0 -> 124.0)
+[03:15:45] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   hit ship is in combat
+[03:15:45] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   firing ship took no damage
+[03:15:45] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   no cannonballs left in flight
+[03:15:46] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   second broadside fires after reload
+[03:15:50] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   shipCombat=false: no hull damage
+[03:15:50] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   third broadside fires
+[03:15:54] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   same owner, friendlyFire=false: no hull damage
+[03:15:54] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   gun fires
+[03:15:56] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   mobs=true: the target in the line of fire was destroyed
+[03:15:56] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   gun fires
+[03:15:57] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   mobs=false: the target was left alone
+[03:15:57] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   gun fires
+[03:15:59] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   blockDamage=true: the glass target is gone
+[03:15:59] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   gun fires
+[03:16:00] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   blockDamage=false: the glass target is intact
+[03:16:01] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   sinking test ship spawned
+[03:16:01] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   rider is seated on the ship
+[03:16:01] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   zero hull starts the sinking
+[03:16:01] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   riders are thrown off a sinking ship
+[03:16:01] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a sinking ship can't fire
+[03:16:07] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   ship became a wreck
+[03:16:07] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   wreck lies lower (100.55 -> 100.00)
+[03:16:07] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   wreck is listing (roll 18.0)
+[03:16:07] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   raising without the full cost fails
+[03:16:07] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   failed raise takes nothing
+[03:16:07] [Server thread/INFO] [tidesofwar/]: Loaded 1 ship(s)
+[03:16:07] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   wreck survives save/load
+[03:16:07] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   wreck state, roll and hull survive save/load
+[03:16:08] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   reloaded wreck spawned its visuals
+[03:16:08] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   raising with the full cost works
+[03:16:08] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   raise consumed exactly the cost
+[03:16:08] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   raised ship is afloat
+[03:16:08] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   raised ship has the configured hull
+[03:16:12] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   raised ship is back on the surface, upright
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   Sails II is refused on a stock ship
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   Sails I installs
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   Sails I raises top speed (0.450 -> 0.517)
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   Sails I can't be installed twice
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   Sails II raises top speed again
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   Rudder I raises the turn rate
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   Cannons I reload faster and hit harder
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   Flight Core installs
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   Flight Core can't be installed twice
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   Hull plating I installs
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   hull plating I raises max hull by 25% (75.0)
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   current hull rose by the same amount (45.0)
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   no upgrading during a battle
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   an upgraded ship has extra parts (61 -> 74)
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgrades don't change seats or cannons
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgraded ship respawns with its new parts
+[03:16:13] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgraded ship sinks at zero hull
+[03:16:20] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a wreck keeps its upgrades (H1 S2 R1 C1 F)
+[03:16:20] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   upgraded wreck can be raised
+[03:16:20] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a raised ship keeps its upgrades and a sane hull
+[03:16:20] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   packed upgraded ship keeps them
+[03:16:20] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   packed hull respects the upgraded maximum
+[03:16:20] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a ship without a Flight Core can't take off
+[03:16:20] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   flying can be disabled in the config
+[03:16:20] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a Flight Core ship takes off
+[03:16:23] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   looking up climbs (100.55 -> 103.68)
+[03:16:23] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   climbing without throttle doesn't drift
+[03:16:25] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   flying ahead moves the ship (3.02)
+[03:16:25] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   level look keeps altitude
+[03:16:27] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   landing starts
+[03:16:33] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   the ship came down onto the water and sails again
+[03:16:33] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   landed at the waterline (100.55)
+[03:16:36] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   landing on a block beaches the ship
+[03:16:36] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   beached on top of the slab (107.90)
+[03:16:37] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a beached ship doesn't sail
+[03:16:37] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a beached Flight Core ship takes off again
+[03:16:37] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   zero hull in the air starts a fall
+[03:16:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a ship that falls onto land becomes a wreck there (107.86)
+[03:16:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a Flight Core wreck on land can be raised
+[03:16:41] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   the raised land wreck is beached
+[03:16:55] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a ship shot down over water ends as a wreck on the bed (100.00 of 100.65)
+[03:16:55] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   no fuel, no take-off when fuel is configured
+[03:16:55] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a floating ship is solid
+[03:16:55] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   the first model part names the ship type for the client mod
+[03:16:55] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   other entities are not ship anchors
+[03:16:55] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a player is assumed to have no client mod
+[03:16:55] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   the hello command records the client mod version
+[03:16:55] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   leaving forgets the client mod
+[03:16:55] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a dropped item lands on the deck, not in the water (101.205 vs 101.205)
+[03:16:55] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   an item pushed at the hull from outside is stopped by it (local x 2.13)
+[03:16:58] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   the ship sailed and turned (10.4 blocks, yaw 61)
+[03:16:58] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   an item on the deck is carried along (local 1.00, 0.62, 1.50)
+[03:17:07] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   a wreck is not solid
+[03:17:07] [Server thread/INFO] [tidesofwar/]: SELFTEST ok   things fall through a wreck (99.00 vs deck 100.62)
+[03:17:07] [Server thread/INFO] [tidesofwar/]: TIDESOFWAR SELFTEST PASS
+[03:17:08] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[03:17:08] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[03:17:08] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[03:17:08] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[03:17:08] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[03:17:08] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[03:17:08] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[03:17:08] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[03:17:08] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[03:17:08] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/selftest-1795403644588.json
+
+BUILD SUCCESSFUL in 3m 5s
+5 actionable tasks: 2 executed, 3 up-to-date

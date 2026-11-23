@@ -1,0 +1,10 @@
+11f860562184737786ff70d0c94b065699b66ac8
+26.1-fabric build=success selftest=success
+26.1-forge build=success selftest=success
+26.1-neoforge build=success selftest=success
+26.2-fabric build=success selftest=success
+26.2-forge build=success selftest=success
+26.2-neoforge build=success selftest=success
+26.3-fabric build=success selftest=success
+26.3-forge build=success selftest=success
+26.3-neoforge build=success selftest=success

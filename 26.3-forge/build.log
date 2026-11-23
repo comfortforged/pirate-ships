@@ -1,0 +1,240 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+Running Stonecutter 0.10
+
+> Configure project :26.1-fabric
+Fabric Loom: 1.19.4
+
+> Configure project :26.1-forge
+Minecraft Mavenizer 0.5.21 by Forge Development LLC
+  Output:             /home/runner/work/pirate-ships/pirate-ships/.gradle/mavenizer/repo
+  Output JSON:        /home/runner/work/pirate-ships/pirate-ships/.gradle/mavenizer/dependencies/default.json
+  Dependencies Only:  false
+  Cache:              /home/runner/.gradle/caches/minecraftforge/forgegradle/mavenizer/caches
+  JDK Cache:          /home/runner/.gradle/caches/minecraftforge/forgegradle/mavenizer/caches
+  Offline:            false
+  Cache Only:         false
+  Ignore Cache:       false
+  Mappings:           auto
+  Foreign Repos:      [https://repo.maven.apache.org/maven2/, https://maven.minecraftforge.net/, https://libraries.minecraft.net/]
+  GradleVariantHack:  true
+  Disable Gradle:     false
+  Stub Jars:          false
+
+Processing Minecraft dependency: net.minecraftforge:forge:26.1.2-64.1.6
+Using Mappings: official-26.1.2
+Processing Minecraft Forge (userdev): 26.1.2-64.1.6
+Mappings Zip
+  srg2names[official-26.1.2][Empty]
+Mappings POM
+  pom[mappings_official]
+Client Extra
+  downloadLauncherManifest
+  downloadVersionJson[26.1.2]
+  download[26.1.2][client]
+  extra[client]
+Client Maven POM
+  pom[client-extra]
+Sources
+  listLibraries
+  download[26.1.2][server]
+  extractServer
+  stripServer
+  stripClient
+  merge
+  modifyAccess
+  stripSides
+  decompile
+  patch
+  patch[forge]
+  downloadSources
+  injectSources[forge]
+  remap[forge][official-26.1.2][javadoc]
+  remap[forge][official-26.1.2][javadoc][variants]
+Cache miss!
+java.lang.Exception: Cache miss! Stacktrace for Information Only
+	at net.minecraftforge.mcmaven.impl.Mavenizer.assertNotCacheOnly(Mavenizer.java:60)
+	at net.minecraftforge.mcmaven.impl.Mavenizer.checkCache(Mavenizer.java:94)
+	at net.minecraftforge.mcmaven.impl.MinecraftMaven.finalize(MinecraftMaven.java:416)
+	at net.minecraftforge.mcmaven.impl.MinecraftMaven.createForge(MinecraftMaven.java:241)
+	at net.minecraftforge.mcmaven.impl.MinecraftMaven.run(MinecraftMaven.java:119)
+	at net.minecraftforge.mcmaven.cli.MavenTask.run(MavenTask.java:218)
+	at net.minecraftforge.mcmaven.cli.Main.run(Main.java:70)
+	at net.minecraftforge.mcmaven.cli.Main.main(Main.java:23)
+Classes
+  recompile[forge][official-26.1.2]
+  injectData[forge][official-26.1.2]
+  injectData[forge][official-26.1.2][variants]
+Maven POM
+  pom[forge]
+Metadata
+  metadata[forge]
+  metadata[forge][variants]
+Minecraft Maven has finished, took 0:01.329
+
+> Configure project :26.1-neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Configure project :26.2-fabric
+Fabric Loom: 1.19.4
+
+> Configure project :26.2-forge
+Minecraft Mavenizer 0.5.21 by Forge Development LLC
+  Output:             /home/runner/work/pirate-ships/pirate-ships/.gradle/mavenizer/repo
+  Output JSON:        /home/runner/work/pirate-ships/pirate-ships/.gradle/mavenizer/dependencies/default.json
+  Dependencies Only:  false
+  Cache:              /home/runner/.gradle/caches/minecraftforge/forgegradle/mavenizer/caches
+  JDK Cache:          /home/runner/.gradle/caches/minecraftforge/forgegradle/mavenizer/caches
+  Offline:            false
+  Cache Only:         false
+  Ignore Cache:       false
+  Mappings:           auto
+  Foreign Repos:      [https://repo.maven.apache.org/maven2/, https://maven.minecraftforge.net/, https://libraries.minecraft.net/]
+  GradleVariantHack:  true
+  Disable Gradle:     false
+  Stub Jars:          false
+
+Processing Minecraft dependency: net.minecraftforge:forge:26.2-65.1.6
+Using Mappings: official-26.2
+Processing Minecraft Forge (userdev): 26.2-65.1.6
+Mappings Zip
+  srg2names[official-26.2][Empty]
+Mappings POM
+  pom[mappings_official]
+Client Extra
+  downloadLauncherManifest
+  downloadVersionJson[26.2]
+  download[26.2][client]
+  extra[client]
+Client Maven POM
+  pom[client-extra]
+Sources
+  listLibraries
+  download[26.2][server]
+  extractServer
+  stripServer
+  stripClient
+  merge
+  modifyAccess
+  stripSides
+  decompile
+  patch
+  patch[forge]
+  downloadSources
+  injectSources[forge]
+  remap[forge][official-26.2][javadoc]
+  remap[forge][official-26.2][javadoc][variants]
+Cache miss!
+java.lang.Exception: Cache miss! Stacktrace for Information Only
+	at net.minecraftforge.mcmaven.impl.Mavenizer.assertNotCacheOnly(Mavenizer.java:60)
+	at net.minecraftforge.mcmaven.impl.Mavenizer.checkCache(Mavenizer.java:94)
+	at net.minecraftforge.mcmaven.impl.MinecraftMaven.finalize(MinecraftMaven.java:416)
+	at net.minecraftforge.mcmaven.impl.MinecraftMaven.createForge(MinecraftMaven.java:241)
+	at net.minecraftforge.mcmaven.impl.MinecraftMaven.run(MinecraftMaven.java:119)
+	at net.minecraftforge.mcmaven.cli.MavenTask.run(MavenTask.java:218)
+	at net.minecraftforge.mcmaven.cli.Main.run(Main.java:70)
+	at net.minecraftforge.mcmaven.cli.Main.main(Main.java:23)
+Classes
+  recompile[forge][official-26.2]
+  injectData[forge][official-26.2]
+  injectData[forge][official-26.2][variants]
+Maven POM
+  pom[forge]
+Metadata
+  metadata[forge]
+  metadata[forge][variants]
+Minecraft Maven has finished, took 0:01.038
+
+> Configure project :26.2-neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Configure project :26.3-fabric
+Fabric Loom: 1.19.4
+
+> Configure project :26.3-forge
+Minecraft Mavenizer 0.5.21 by Forge Development LLC
+  Output:             /home/runner/work/pirate-ships/pirate-ships/.gradle/mavenizer/repo
+  Output JSON:        /home/runner/work/pirate-ships/pirate-ships/.gradle/mavenizer/dependencies/default.json
+  Dependencies Only:  false
+  Cache:              /home/runner/.gradle/caches/minecraftforge/forgegradle/mavenizer/caches
+  JDK Cache:          /home/runner/.gradle/caches/minecraftforge/forgegradle/mavenizer/caches
+  Offline:            false
+  Cache Only:         false
+  Ignore Cache:       false
+  Mappings:           auto
+  Foreign Repos:      [https://repo.maven.apache.org/maven2/, https://maven.minecraftforge.net/, https://libraries.minecraft.net/]
+  GradleVariantHack:  true
+  Disable Gradle:     false
+  Stub Jars:          false
+
+Processing Minecraft dependency: net.minecraftforge:forge:26.3-66.1.9
+Using Mappings: official-26.3
+Processing Minecraft Forge (userdev): 26.3-66.1.9
+Mappings Zip
+  srg2names[official-26.3][Empty]
+Mappings POM
+  pom[mappings_official]
+Client Extra
+  downloadLauncherManifest
+  downloadVersionJson[26.3]
+  download[26.3][client]
+  extra[client]
+Client Maven POM
+  pom[client-extra]
+Sources
+  listLibraries
+  download[26.3][server]
+  extractServer
+  stripServer
+  stripClient
+  merge
+  modifyAccess
+  stripSides
+  decompile
+  patch
+  patch[forge]
+  downloadSources
+  injectSources[forge]
+  remap[forge][official-26.3][javadoc]
+  remap[forge][official-26.3][javadoc][variants]
+Cache miss!
+java.lang.Exception: Cache miss! Stacktrace for Information Only
+	at net.minecraftforge.mcmaven.impl.Mavenizer.assertNotCacheOnly(Mavenizer.java:60)
+	at net.minecraftforge.mcmaven.impl.Mavenizer.checkCache(Mavenizer.java:94)
+	at net.minecraftforge.mcmaven.impl.MinecraftMaven.finalize(MinecraftMaven.java:416)
+	at net.minecraftforge.mcmaven.impl.MinecraftMaven.createForge(MinecraftMaven.java:241)
+	at net.minecraftforge.mcmaven.impl.MinecraftMaven.run(MinecraftMaven.java:119)
+	at net.minecraftforge.mcmaven.cli.MavenTask.run(MavenTask.java:218)
+	at net.minecraftforge.mcmaven.cli.Main.run(Main.java:70)
+	at net.minecraftforge.mcmaven.cli.Main.main(Main.java:23)
+Classes
+  recompile[forge][official-26.3]
+  injectData[forge][official-26.3]
+  injectData[forge][official-26.3][variants]
+Maven POM
+  pom[forge]
+Metadata
+  metadata[forge]
+  metadata[forge][variants]
+Minecraft Maven has finished, took 0:01.019
+
+> Configure project :26.3-neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Task :26.3-forge:stonecutterGenerate
+> Task :26.3-forge:compileJava
+> Task :26.3-forge:processResources
+> Task :26.3-forge:classes
+> Task :26.3-forge:jar
+> Task :26.3-forge:sourcesJar
+> Task :26.3-forge:assemble
+> Task :26.3-forge:stonecutterGenerateTest
+> Task :26.3-forge:compileTestJava NO-SOURCE
+> Task :26.3-forge:processTestResources NO-SOURCE
+> Task :26.3-forge:testClasses UP-TO-DATE
+> Task :26.3-forge:test NO-SOURCE
+> Task :26.3-forge:check UP-TO-DATE
+> Task :26.3-forge:build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1795403563242.json
+
+BUILD SUCCESSFUL in 27s
+6 actionable tasks: 6 executed
